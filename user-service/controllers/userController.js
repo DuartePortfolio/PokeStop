@@ -4,81 +4,100 @@ const authService = require("../services/authService")
 
 
 exports.register = async (req, res) => {
-  const { username, password } = req.body
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password required' })
+  const { username, password, displayName, avatar, bio, badges, stats } = req.body;
+  if (!username || !password || !displayName) {
+    return res.status(400).json({ message: 'Username, password, and displayName are required' });
   }
   try {
-    const user = await userService.createUser(username, password)
-    res.status(201).json({ message: 'User created', user })
+    const user = await userService.createUser({ username, password, displayName, avatar, bio, badges, stats });
+    res.status(201).json({ message: 'User created', user });
   } catch (err) {
-    res.status(400).json({ message: err.message })
+    res.status(400).json({ message: err.message });
   }
-}
+};
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body
+  const { username, password } = req.body;
   if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password required' })
+    return res.status(400).json({ message: 'Username and password required' });
   }
-  const user = await userService.validateUser(username, password)
+  const user = await userService.validateUser(username, password);
   if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' })
+    return res.status(401).json({ message: 'Invalid credentials' });
   }
-  const token = authService.generateToken(user)
-  res.json({ message: 'Login successful', token })
-}
+  const token = authService.generateToken(user);
+  res.json({ message: 'Login successful', token });
+};
 
-exports.getAllUsers = (req, res) => {
-  const users = userService.getAllUsers()
-  res.json(users)
-}
+exports.getAllUsers = async (req, res) => {
+  const users = await userService.getAllUsers();
+  res.json(users.map(u => ({
+    id: u.id,
+    username: u.username,
+    displayName: u.displayName,
+    avatar: u.avatar,
+    bio: u.bio,
+    badges: u.badges,
+    stats: u.stats,
+    role: u.role,
+    createdAt: u.createdAt,
+    updatedAt: u.updatedAt
+  })));
+};
 
-exports.getUserById = (req, res) => {
-  const userId = parseInt(req.params.id)
-  const user = userService.getUserById(userId)
+exports.getUserById = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const user = await userService.getUserById(userId);
   if (user) {
-    res.json(user)
+    res.json({
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      avatar: user.avatar,
+      bio: user.bio,
+      badges: user.badges,
+      stats: user.stats,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    });
   } else {
-    res.status(404).json({ error: "User not found" })
+    res.status(404).json({ error: 'User not found' });
   }
-}
+};
 
-exports.deleteUser = (req, res) => {
-  const userId = parseInt(req.params.id)
-  const deleted = userService.deleteUser(userId)
+exports.deleteUser = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const deleted = await userService.deleteUser(userId);
   if (deleted) {
-    res.status(204).send()
+    res.status(204).send();
   } else {
-    res.status(404).json({ error: "User not found" })
+    res.status(404).json({ error: 'User not found' });
   }
-}
+};
 
-exports.updateUser = (req, res) => {
-  const userId = parseInt(req.params.id)
-  const { name, email } = req.body
-  const user = userService.updateUser(userId, name, email)
+exports.updateUser = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const updates = req.body;
+  // Prevent role from being updated via this endpoint
+  if ('role' in updates) delete updates.role;
+  const user = await userService.updateUser(userId, updates);
   if (user) {
-    res.json(user)
+    res.json({
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      avatar: user.avatar,
+      bio: user.bio,
+      badges: user.badges,
+      stats: user.stats,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    });
   } else {
-    res.status(404).json({ error: "User not found" })
+    res.status(404).json({ error: 'User not found' });
   }
-}
+};
 
-exports.loginUser = async (req, res) => {
-  const { email, password } = req.body || {}
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Missing email or password in request body' })
-  }
-
-  try {
-    const user = await userService.loginUser(email, password)
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' })
-
-    const { password: _p, ...publicUser } = user
-    const token = authService.signToken({ id: publicUser.id, email: publicUser.email, role: publicUser.role || 'user' })
-    return res.json({ user: publicUser, token })
-  } catch (err) {
-    return res.status(500).json({ error: 'Internal error' })
-  }
-}
+// ...removed legacy loginUser...

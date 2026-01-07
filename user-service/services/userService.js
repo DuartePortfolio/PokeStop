@@ -1,51 +1,53 @@
+const bcrypt = require('bcrypt');
+const User = require('../models/User');
 
-const bcrypt = require('bcrypt')
-const users = require('../data/mockUsers')
-
-async function createUser(username, password) {
-  if (!username || !password) {
-    throw new Error('Username and password are required')
+async function createUser({ username, password, displayName, avatar, bio, badges, stats }) {
+  if (!username || !password || !displayName) {
+    throw new Error('Username, password, and displayName are required');
   }
-  if (users.find(u => u.username === username)) {
-    throw new Error('User already exists')
+  const existing = await User.findOne({ where: { username } });
+  if (existing) {
+    throw new Error('User already exists');
   }
-  const hashedPassword = await bcrypt.hash(password, 10)
-  const user = { id: users.length + 1, username, password: hashedPassword }
-  users.push(user)
-  return { id: user.id, username: user.username }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await User.create({
+    username,
+    password: hashedPassword,
+    displayName,
+    avatar,
+    bio,
+    badges,
+    stats,
+    role: 'user' // Always set role to 'user' on registration
+  });
+  return { id: user.id, username: user.username, displayName: user.displayName, role: user.role };
 }
 
 async function validateUser(username, password) {
-  const user = users.find(u => u.username === username)
-  if (!user) return false
-  const match = await bcrypt.compare(password, user.password)
-  return match ? { id: user.id, username: user.username } : false
+  const user = await User.findOne({ where: { username } });
+  if (!user) return false;
+  const match = await bcrypt.compare(password, user.password);
+  return match ? { id: user.id, username: user.username, displayName: user.displayName } : false;
 }
 
-function deleteUser(id) {
-  const userIndex = users.findIndex((u) => u.id === id)
-  if (userIndex !== -1) {
-    users.splice(userIndex, 1)
-    return true
-  }
-  return false
+async function deleteUser(id) {
+  const deleted = await User.destroy({ where: { id } });
+  return !!deleted;
 }
 
-function updateUser(id, username) {
-  const user = users.find((u) => u.id === id)
-  if (user) {
-    user.username = username || user.username
-    return user
-  }
-  return null
+async function updateUser(id, updates) {
+  const user = await User.findByPk(id);
+  if (!user) return null;
+  await user.update(updates);
+  return user;
 }
 
-function getAllUsers() {
-  return users
+async function getAllUsers() {
+  return await User.findAll();
 }
 
-function getUserById(id) {
-  return users.find((u) => u.id === id)
+async function getUserById(id) {
+  return await User.findByPk(id);
 }
 
-module.exports = { createUser, validateUser, deleteUser, updateUser, getAllUsers, getUserById }
+module.exports = { createUser, validateUser, deleteUser, updateUser, getAllUsers, getUserById };

@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "PokeStop User Service",
+    "name": "PokeStop User Service (Sequelize)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -13,7 +13,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"testpass\"\n}"
+          "raw": "{\n  \"username\": \"ashketchum\",\n  \"password\": \"pikachu123\",\n  \"displayName\": \"Ash Ketchum\",\n  \"avatar\": \"https://example.com/avatar.png\",\n  \"bio\": \"I wanna be the very best!\",\n  \"badges\": [\"Boulder\", \"Cascade\"],\n  \"stats\": {\"wins\": 10, \"losses\": 2}\n}"
         },
         "url": {
           "raw": "http://localhost:3001/users/register",
@@ -33,7 +33,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"testpass\"\n}"
+          "raw": "{\n  \"username\": \"ashketchum\",\n  \"password\": \"pikachu123\"\n}"
         },
         "url": {
           "raw": "http://localhost:3001/users/login",
@@ -86,7 +86,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"username\": \"updateduser\"\n}"
+          "raw": "{\n  \"displayName\": \"Ash K.\",\n  \"bio\": \"Updated bio!\"\n}"
         },
         "url": {
           "raw": "http://localhost:3001/users/1",
