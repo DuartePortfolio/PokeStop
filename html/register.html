@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Registo — PokeStop</title>
+        <link rel="stylesheet" href="../styles/register.css">
+</head>
+<body>
+    <main class="page">
+        <form id="registerForm" class="card" novalidate>
+            <h1>Registar</h1>
+            <p class="subtitle">Crie a sua conta PokeStop</p>
+
+            <label class="field">
+                <span>Nome completo</span>
+                <input id="name" name="name" type="text" required minlength="2" autocomplete="name">
+                <small class="error" id="nameError"></small>
+            </label>
+
+            <label class="field">
+                <span>Email</span>
+                <input id="email" name="email" type="email" required autocomplete="email">
+                <small class="error" id="emailError"></small>
+            </label>
+
+            <label class="field">
+                <span>Nome de utilizador</span>
+                <input id="username" name="username" type="text" required minlength="3" autocomplete="username">
+                <small class="error" id="usernameError"></small>
+            </label>
+
+            <label class="field">
+                <span>Password</span>
+                <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
+                <meter max="4" id="passwordStrength" value="0"></meter>
+                <small class="error" id="passwordError"></small>
+            </label>
+
+            <label class="field">
+                <span>Confirmar password</span>
+                <input id="confirmPassword" name="confirmPassword" type="password" required autocomplete="new-password">
+                <small class="error" id="confirmError"></small>
+            </label>
+
+            <button type="submit" class="btn">Criar conta</button>
+
+            <p class="muted">Já tem conta? <a href="login.html">Entrar</a></p>
+
+            <div id="success" class="success" aria-live="polite" hidden>Conta criada com sucesso.</div>
+        </form>
+    </main>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const nameEl = document.getElementById('name');
+        const emailEl = document.getElementById('email');
+        const usernameEl = document.getElementById('username');
+        const passwordEl = document.getElementById('password');
+        const confirmEl = document.getElementById('confirmPassword');
+        const pwdMeter = document.getElementById('passwordStrength');
+
+        function showError(el, msg) {
+            const err = document.getElementById(el.id + 'Error');
+            err.textContent = msg || '';
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function passwordScore(pwd) {
+            let score = 0;
+            if (pwd.length >= 8) score++;
+            if (/[A-Z]/.test(pwd)) score++;
+            if (/[0-9]/.test(pwd)) score++;
+            if (/[^A-Za-z0-9]/.test(pwd)) score++;
+            return score;
+        }
+
+        passwordEl.addEventListener('input', () => {
+            pwdMeter.value = passwordScore(passwordEl.value);
+            showError(passwordEl, '');
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let ok = true;
+
+            // name
+            if (!nameEl.value.trim() || nameEl.value.trim().length < 2) {
+                showError(nameEl, 'Informe o seu nome (mín. 2 caracteres)'); ok = false;
+            } else showError(nameEl, '');
+
+            // email
+            if (!validateEmail(emailEl.value)) {
+                showError(emailEl, 'Email inválido'); ok = false;
+            } else showError(emailEl, '');
+
+            // username
+            if (!usernameEl.value.trim() || usernameEl.value.trim().length < 3) {
+                showError(usernameEl, 'Nome de utilizador (mín. 3 caracteres)'); ok = false;
+            } else showError(usernameEl, '');
+
+            // password
+            if (passwordEl.value.length < 8) {
+                showError(passwordEl, 'A password deve ter pelo menos 8 caracteres'); ok = false;
+            } else showError(passwordEl, '');
+
+            // confirm
+            if (confirmEl.value !== passwordEl.value) {
+                showError(confirmEl, 'As passwords não coincidem'); ok = false;
+            } else showError(confirmEl, '');
+
+            if (!ok) return;
+
+            // Mostrar sucesso (substitua por envio ao backend conforme necessário)
+            document.getElementById('success').hidden = false;
+            form.reset();
+            pwdMeter.value = 0;
+
+            // Exemplo: enviar ao backend (descomentar e ajustar URL quando tiver API)
+            /*
+            fetch('/user-service/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: nameEl.value, email: emailEl.value, username: usernameEl.value, password: passwordEl.value})
+            }).then(r => r.json()).then(console.log).catch(console.error);
+            */
+        });
+    </script>
+</body>
+</html>
