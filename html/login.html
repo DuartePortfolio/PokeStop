@@ -1,11 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Log in</title>
+    <link rel="stylesheet" href="../styles/register.css">
 </head>
 <body>
-    
+    <main class="page">
+        <form id="loginForm" class="card" novalidate>
+            <h1>Log In</h1>
+            <p class="subtitle">Access your PokeStop account</p>
+
+            <label class="field">
+                <span>Username</span>
+                <input id="username" name="username" type="text" required autocomplete="username">
+                <small class="error" id="usernameError"></small>
+            </label>
+
+            <label class="field">
+                <span>Password</span>
+                <input id="password" name="password" type="password" required autocomplete="current-password">
+                <small class="error" id="passwordError"></small>
+            </label>
+
+            <button type="submit" class="btn">Log in</button>
+
+            <p class="muted">Don't have an account? <a href="register.html">Create one</a></p>
+
+            <div id="success" class="success" aria-live="polite" hidden>Login successful!</div>
+        </form>
+    </main>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const usernameEl = document.getElementById('username');
+        const passwordEl = document.getElementById('password');
+
+        function showError(el, msg) {
+            const err = document.getElementById(el.id + 'Error');
+            if (err) err.textContent = msg || '';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let ok = true;
+
+            if (!usernameEl.value.trim()) {
+                showError(usernameEl, 'Username is required'); ok = false;
+            } else showError(usernameEl, '');
+
+            if (!passwordEl.value) {
+                showError(passwordEl, 'Password is required'); ok = false;
+            } else showError(passwordEl, '');
+
+            if (!ok) return;
+
+            // Mostrar sucesso
+            document.getElementById('success').hidden = false;
+            form.reset();
+
+            /*
+            // Exemplo de chamada ao backend (ajuste URL conforme necessário)
+            try {
+                const res = await fetch('/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameEl.value, password: passwordEl.value })
+                });
+                const json = await res.json();
+                if (!res.ok) {
+                    // mostra erro vinda do servidor (ex.: credenciais inválidas)
+                    showError(passwordEl, json.message || 'Login failed');
+                    document.getElementById('success').hidden = true;
+                    return;
+                }
+                // armazenar token / redirecionar conforme necessário
+                console.log(json);
+            } catch (err) {
+                showError(passwordEl, 'Network error');
+                document.getElementById('success').hidden = true;
+            }
+            */
+        });
+
+        // Limpar erros ao digitar
+        usernameEl.addEventListener('input', () => showError(usernameEl, ''));
+        passwordEl.addEventListener('input', () => showError(passwordEl, ''));
+    </script>
 </body>
 </html>
