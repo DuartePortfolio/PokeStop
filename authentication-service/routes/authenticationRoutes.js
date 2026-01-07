@@ -1,10 +1,9 @@
 const express = require("express");
+const authenticationController = require("../controllers/authenticationController");
 const router = express.Router();
-const teamController = require("../controllers/authenticationController");
 
 // public routes
-
-// protected routes
-
+router.post("/register", authenticationController.register);
+router.post("/login", authenticationController.login);
 
 module.exports = router;
