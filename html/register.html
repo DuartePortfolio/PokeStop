@@ -3,29 +3,29 @@
 <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Registo — PokeStop</title>
+        <title>Create an account</title>
         <link rel="stylesheet" href="../styles/register.css">
 </head>
 <body>
     <main class="page">
         <form id="registerForm" class="card" novalidate>
-            <h1>Registar</h1>
-            <p class="subtitle">Crie a sua conta PokeStop</p>
+            <h1>Sign Up</h1>
+            <p class="subtitle">Create your PokeStop account</p>
 
             <label class="field">
-                <span>Nome completo</span>
+                <span>Full Name</span>
                 <input id="name" name="name" type="text" required minlength="2" autocomplete="name">
                 <small class="error" id="nameError"></small>
             </label>
 
             <label class="field">
-                <span>Email</span>
+                <span>E-mail</span>
                 <input id="email" name="email" type="email" required autocomplete="email">
                 <small class="error" id="emailError"></small>
             </label>
 
             <label class="field">
-                <span>Nome de utilizador</span>
+                <span>Username</span>
                 <input id="username" name="username" type="text" required minlength="3" autocomplete="username">
                 <small class="error" id="usernameError"></small>
             </label>
@@ -33,21 +33,20 @@
             <label class="field">
                 <span>Password</span>
                 <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
-                <meter max="4" id="passwordStrength" value="0"></meter>
                 <small class="error" id="passwordError"></small>
             </label>
 
             <label class="field">
-                <span>Confirmar password</span>
+                <span>Repeat password</span>
                 <input id="confirmPassword" name="confirmPassword" type="password" required autocomplete="new-password">
-                <small class="error" id="confirmError"></small>
+                <small class="error" id="confirmPasswordError"></small>
             </label>
 
-            <button type="submit" class="btn">Criar conta</button>
+            <button type="submit" class="btn">Create Account</button>
 
-            <p class="muted">Já tem conta? <a href="login.html">Entrar</a></p>
+            <p class="muted">Already have an account? <a href="login.html">Log in</a></p>
 
-            <div id="success" class="success" aria-live="polite" hidden>Conta criada com sucesso.</div>
+            <div id="success" class="success" aria-live="polite" hidden>Account successfully created!</div>
         </form>
     </main>
 
@@ -58,11 +57,10 @@
         const usernameEl = document.getElementById('username');
         const passwordEl = document.getElementById('password');
         const confirmEl = document.getElementById('confirmPassword');
-        const pwdMeter = document.getElementById('passwordStrength');
 
         function showError(el, msg) {
             const err = document.getElementById(el.id + 'Error');
-            err.textContent = msg || '';
+            if (err) err.textContent = msg || '';
         }
 
         function validateEmail(email) {
@@ -79,7 +77,7 @@
         }
 
         passwordEl.addEventListener('input', () => {
-            pwdMeter.value = passwordScore(passwordEl.value);
+            // no meter used — just clear password error while typing
             showError(passwordEl, '');
         });
 
@@ -89,35 +87,34 @@
 
             // name
             if (!nameEl.value.trim() || nameEl.value.trim().length < 2) {
-                showError(nameEl, 'Informe o seu nome (mín. 2 caracteres)'); ok = false;
+                showError(nameEl, 'Invalid Name (min. 2 names)'); ok = false;
             } else showError(nameEl, '');
 
             // email
             if (!validateEmail(emailEl.value)) {
-                showError(emailEl, 'Email inválido'); ok = false;
+                showError(emailEl, 'Invalid E-mail'); ok = false;
             } else showError(emailEl, '');
 
             // username
             if (!usernameEl.value.trim() || usernameEl.value.trim().length < 3) {
-                showError(usernameEl, 'Nome de utilizador (mín. 3 caracteres)'); ok = false;
+                showError(usernameEl, 'Invalid Username (min. 3 characters)'); ok = false;
             } else showError(usernameEl, '');
 
             // password
             if (passwordEl.value.length < 8) {
-                showError(passwordEl, 'A password deve ter pelo menos 8 caracteres'); ok = false;
+                showError(passwordEl, 'Your password must have at least 8 characters'); ok = false;
             } else showError(passwordEl, '');
 
             // confirm
             if (confirmEl.value !== passwordEl.value) {
-                showError(confirmEl, 'As passwords não coincidem'); ok = false;
+                showError(confirmEl, "Passwords don't match"); ok = false;
             } else showError(confirmEl, '');
 
             if (!ok) return;
 
-            // Mostrar sucesso (substitua por envio ao backend conforme necessário)
+            // Mostrar sucesso
             document.getElementById('success').hidden = false;
             form.reset();
-            pwdMeter.value = 0;
 
             // Exemplo: enviar ao backend (descomentar e ajustar URL quando tiver API)
             /*
