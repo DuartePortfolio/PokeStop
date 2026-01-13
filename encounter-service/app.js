@@ -4,3 +4,5 @@ const app = express();
 
 app.use(express.json());
 
+const PORT = process.env.PORT || 3005;
+app.listen(PORT, () => console.log(`Encounter service running on port ${PORT}`));

@@ -2,6 +2,7 @@
 -- Database: pokestop_auth_db
 -- Purpose: JWT refresh tokens, password reset tokens, security tracking
 
+CREATE DATABASE IF NOT EXISTS pokestop_auth_db;
 USE pokestop_auth_db;
 
 -- Refresh tokens for JWT token rotation and session management
