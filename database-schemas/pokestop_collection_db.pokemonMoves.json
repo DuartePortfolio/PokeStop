@@ -1,0 +1,13 @@
+[{
+  "_id": {
+    "$oid": "6965142c749f784380bf5327"
+  },
+  "pokemonInstanceId": {
+    "$oid": "696513e4749f784380bf5325"
+  },
+  "moveName": "Thunderbolt",
+  "moveType": "Electric",
+  "power": 90,
+  "accuracy": 100,
+  "slot": 1
+}]

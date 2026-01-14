@@ -1,0 +1,138 @@
+[{
+  "_id": {
+    "$oid": "696513e4749f784380bf5325"
+  },
+  "userID": 101,
+  "pokemonID": 25,
+  "nickname": "Sparky",
+  "level": 35,
+  "experience": 4200,
+  "hp": 95,
+  "attack": 55,
+  "defense": 40,
+  "spAttack": 50,
+  "spDefense": 50,
+  "speed": 90,
+  "isShiny": false,
+  "gender": "male",
+  "ability": "Static",
+  "heldItem": "Light Ball",
+  "obtainedAt": {
+    "$date": "2025-11-20T14:30:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69651498749f784380bf5329"
+  },
+  "userID": 101,
+  "pokemonID": 1,
+  "nickname": "Tiny",
+  "level": 20,
+  "experience": 1500,
+  "hp": 50,
+  "attack": 52,
+  "defense": 43,
+  "spAttack": 60,
+  "spDefense": 50,
+  "speed": 65,
+  "isShiny": false,
+  "gender": "female",
+  "ability": "Overgrow",
+  "heldItem": null,
+  "obtainedAt": {
+    "$date": "2025-10-15T10:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6965149f749f784380bf532b"
+  },
+  "userID": 101,
+  "pokemonID": 7,
+  "nickname": "Shellby",
+  "level": 22,
+  "experience": 1800,
+  "hp": 44,
+  "attack": 48,
+  "defense": 65,
+  "spAttack": 50,
+  "spDefense": 64,
+  "speed": 43,
+  "isShiny": false,
+  "gender": "male",
+  "ability": "Torrent",
+  "heldItem": "Mystic Water",
+  "obtainedAt": {
+    "$date": "2025-11-01T09:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "696514ba749f784380bf532c"
+  },
+  "userID": 101,
+  "pokemonID": 4,
+  "nickname": null,
+  "level": 18,
+  "experience": 1200,
+  "hp": 39,
+  "attack": 52,
+  "defense": 43,
+  "spAttack": 60,
+  "spDefense": 50,
+  "speed": 65,
+  "isShiny": true,
+  "gender": "male",
+  "ability": "Blaze",
+  "heldItem": null,
+  "obtainedAt": {
+    "$date": "2025-09-12T12:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "696514c1749f784380bf532d"
+  },
+  "userID": 101,
+  "pokemonID": 133,
+  "nickname": "Eeveeon",
+  "level": 30,
+  "experience": 3500,
+  "hp": 55,
+  "attack": 55,
+  "defense": 50,
+  "spAttack": 45,
+  "spDefense": 65,
+  "speed": 55,
+  "isShiny": false,
+  "gender": "female",
+  "ability": "Run Away",
+  "heldItem": "Eviolite",
+  "obtainedAt": {
+    "$date": "2025-11-05T16:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "696514c7749f784380bf532e"
+  },
+  "userID": 101,
+  "pokemonID": 150,
+  "nickname": "Mewtwo",
+  "level": 50,
+  "experience": 12500,
+  "hp": 106,
+  "attack": 110,
+  "defense": 90,
+  "spAttack": 154,
+  "spDefense": 90,
+  "speed": 130,
+  "isShiny": false,
+  "gender": "male",
+  "ability": "Pressure",
+  "heldItem": null,
+  "obtainedAt": {
+    "$date": "2025-12-01T20:00:00.000Z"
+  }
+}]
