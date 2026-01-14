@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PokeStop — Collections</title>
+  <link rel="stylesheet" href="../styles/collections.css">
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <h1>Your Collections</h1>
+      <p class="subtitle">Create and view your collections</p>
+
+      <form id="createForm" class="form">
+        <label>
+          <span>Name</span>
+          <input id="name" name="name" required>
+        </label>
+        <label>
+          <span>Owner</span>
+          <input id="owner" name="owner" required>
+        </label>
+        <button type="submit" class="btn">Create</button>
+        <div id="createError" class="error"></div>
+      </form>
+
+      <hr>
+
+      <div id="list">
+        <p id="loading">Loading collections…</p>
+        <ul id="items"></ul>
+      </div>
+    </section>
+  </main>
+
+<script>
+const API_BASE = 'http://127.0.0.1:5002';
+
+async function fetchCollections(){
+  const list = document.getElementById('items');
+  const loading = document.getElementById('loading');
+  loading.style.display = 'block';
+  list.innerHTML = '';
+  try{
+    const res = await fetch(`${API_BASE}/collections`);
+    if(!res.ok) throw new Error('Failed to fetch');
+    const data = await res.json();
+    loading.style.display = 'none';
+    if(!data.length) {
+      list.innerHTML = '<li class="muted">No collections yet.</li>';
+      return;
+    }
+    data.forEach(c => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${escapeHtml(c.name)}</strong> — <span class="muted">${escapeHtml(c.owner)}</span> <small class="id">${c._id}</small>`;
+      list.appendChild(li);
+    });
+  }catch(err){
+    loading.textContent = 'Error loading collections';
+    console.error(err);
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(ch){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch];
+  });
+}
+
+const form = document.getElementById('createForm');
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const owner = document.getElementById('owner').value.trim();
+  const errEl = document.getElementById('createError');
+  errEl.textContent = '';
+  if(!name || !owner){ errEl.textContent = 'Both fields required'; return; }
+  try{
+    const res = await fetch(`${API_BASE}/collections`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, owner})
+    });
+    const json = await res.json();
+    if(!res.ok){ errEl.textContent = json.error || 'Create failed'; return; }
+    form.reset();
+    fetchCollections();
+  }catch(err){
+    errEl.textContent = 'Network error';
+  }
+});
+
+fetchCollections();
+</script>
+</body>
+</html>
