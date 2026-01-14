@@ -56,14 +56,9 @@
 
             if (!ok) return;
 
-            // Mostrar sucesso
-            document.getElementById('success').hidden = false;
-            form.reset();
-
-            /*
-            // Exemplo de chamada ao backend (ajuste URL conforme necessário)
+            // Call API Gateway for authentication
             try {
-                const res = await fetch('/users/login', {
+                const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: usernameEl.value, password: passwordEl.value })
@@ -72,16 +67,19 @@
                 if (!res.ok) {
                     // mostra erro vinda do servidor (ex.: credenciais inválidas)
                     showError(passwordEl, json.message || 'Login failed');
-                    document.getElementById('success').hidden = true;
                     return;
                 }
+                // Mostrar sucesso
+                document.getElementById('success').hidden = false;
                 // armazenar token / redirecionar conforme necessário
+                if (json.token) {
+                    localStorage.setItem('authToken', json.token);
+                }
+                form.reset();
                 console.log(json);
             } catch (err) {
                 showError(passwordEl, 'Network error');
-                document.getElementById('success').hidden = true;
             }
-            */
         });
 
         // Limpar erros ao digitar

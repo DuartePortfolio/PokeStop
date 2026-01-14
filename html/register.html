@@ -112,18 +112,25 @@
 
             if (!ok) return;
 
-            // Mostrar sucesso
-            document.getElementById('success').hidden = false;
-            form.reset();
-
-            // Exemplo: enviar ao backend (descomentar e ajustar URL quando tiver API)
-            /*
-            fetch('/user-service/register', {
+            // Call API Gateway for user registration
+            fetch('/api/users/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({name: nameEl.value, email: emailEl.value, username: usernameEl.value, password: passwordEl.value})
-            }).then(r => r.json()).then(console.log).catch(console.error);
-            */
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('Registration failed');
+                return r.json();
+            })
+            .then(data => {
+                // Mostrar sucesso
+                document.getElementById('success').hidden = false;
+                form.reset();
+                console.log(data);
+            })
+            .catch(err => {
+                showError(usernameEl, err.message || 'Network error');
+            });
         });
     </script>
 </body>
