@@ -1,5 +1,7 @@
-const userService = require("../../user-service/services/userService");
+const axios = require('axios');
 const authService = require("../services/authenticationService");
+
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3001';
 
 exports.register = async (req, res) => {
 	const { username, password, displayName, avatar, bio, badges, stats } = req.body;
@@ -7,10 +9,15 @@ exports.register = async (req, res) => {
 		return res.status(400).json({ message: 'Username, password, and displayName are required' });
 	}
 	try {
-		const user = await userService.createUser({ username, password, displayName, avatar, bio, badges, stats });
-		res.status(201).json({ message: 'User created', user });
+		// Call user-service via HTTP
+		const response = await axios.post(`${USER_SERVICE_URL}/users/register`, {
+			username, password, displayName, avatar, bio, badges, stats
+		});
+		res.status(201).json({ message: 'User created', user: response.data.user });
 	} catch (err) {
-		res.status(400).json({ message: err.message });
+		const status = err.response?.status || 500;
+		const message = err.response?.data?.message || err.message;
+		res.status(status).json({ message });
 	}
 };
 
@@ -19,10 +26,20 @@ exports.login = async (req, res) => {
 	if (!username || !password) {
 		return res.status(400).json({ message: 'Username and password required' });
 	}
-	const user = await userService.validateUser(username, password);
-	if (!user) {
-		return res.status(401).json({ message: 'Invalid credentials' });
+	try {
+		// Call user-service to validate credentials
+		const response = await axios.post(`${USER_SERVICE_URL}/users/validate`, {
+			username, password
+		});
+		const user = response.data.user;
+		if (!user) {
+			return res.status(401).json({ message: 'Invalid credentials' });
+		}
+		const token = authService.generateToken(user);
+		res.json({ message: 'Login successful', token });
+	} catch (err) {
+		const status = err.response?.status || 401;
+		const message = err.response?.data?.message || 'Invalid credentials';
+		res.status(status).json({ message });
 	}
-	const token = authService.generateToken(user);
-	res.json({ message: 'Login successful', token });
 };

@@ -1,16 +1,15 @@
-
+version: '3.8'
 
 services:
   # API Gateway (NGINX)
-  nginx:
+  api-gateway:
     image: nginx:alpine
-    container_name: pokestop-gateway
+    container_name: pokestop-api-gateway
     ports:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./html:/usr/share/nginx/html/pages:ro
-      - ./styles:/usr/share/nginx/html/styles:ro
+      - ./html:/usr/share/nginx/html:ro
     depends_on:
       - authentication-service
       - user-service
@@ -20,169 +19,153 @@ services:
       - encounter-service
     networks:
       - pokestop-network
-    restart: unless-stopped
 
-  # MySQL Database (Users, Auth, Encounters)
-  mysql-db:
-    image: mysql:8.0
-    container_name: pokestop-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-enter}
-      MYSQL_DATABASE: pokestop_users_db
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-      - ./database-schemas/pokestop_auth_db.sql:/docker-entrypoint-initdb.d/01-auth-db.sql:ro
-      - ./database-schemas/pokestop_encounter_db.sql:/docker-entrypoint-initdb.d/02-encounter-db.sql:ro
-    networks:
-      - pokestop-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    restart: unless-stopped
-
-  # MongoDB Database (Collections)
-  mongodb:
-    image: mongo:7.0
-    container_name: pokestop-mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-enter}
-      MONGO_INITDB_DATABASE: pokestop_collection_db
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb-data:/data/db
-    networks:
-      - pokestop-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    restart: unless-stopped
-
-  # Authentication Service (Port 3000)
+  # Authentication Service
   authentication-service:
     build:
       context: ./authentication-service
       dockerfile: Dockerfile
-    container_name: pokestop-auth
+    container_name: pokestop-authentication-service
     environment:
-      PORT: 3000
-      JWT_SECRET: ${JWT_SECRET:-pokesecret}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
-      DB_HOST: mysql-db
-      DB_USER: ${DB_USER:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-enter}
-      DB_NAME: pokestop_auth_db
+      - PORT=3000
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-pokestop-secret-change-in-production}
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=enter
+      - DB_NAME=pokestop_auth_db
     depends_on:
-      mysql-db:
-        condition: service_healthy
+      - db
     networks:
       - pokestop-network
     restart: unless-stopped
 
-  # User Service (Port 3001)
+  # User Service
   user-service:
     build:
       context: ./user-service
       dockerfile: Dockerfile
-    container_name: pokestop-users
+    container_name: pokestop-user-service
     environment:
-      PORT: 3001
-      JWT_SECRET: ${JWT_SECRET:-pokesecret}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
-      DB_HOST: mysql-db
-      DB_USER: ${DB_USER:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-enter}
-      DB_NAME: pokestop_users_db
+      - PORT=3001
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-pokestop-secret-change-in-production}
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=enter
+      - DB_NAME=pokestop_users_db
     depends_on:
-      mysql-db:
-        condition: service_healthy
+      - db
     networks:
       - pokestop-network
     restart: unless-stopped
 
-  # Team Service (Port 3002) - No database yet
+  # Team Service
   team-service:
     build:
       context: ./team-service
       dockerfile: Dockerfile
-    container_name: pokestop-teams
+    container_name: pokestop-team-service
     environment:
-      PORT: 3002
-      JWT_SECRET: ${JWT_SECRET:-pokesecret}
+      - PORT=3002
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=enter
+      - DB_NAME=pokestop_teams_db
+    depends_on:
+      - db
     networks:
       - pokestop-network
     restart: unless-stopped
 
-
-  # Pokedex Service (Port 3003) - No database yet
+  # Pokedex Service
   pokedex-service:
     build:
       context: ./pokedex-service
       dockerfile: Dockerfile
-    container_name: pokestop-pokedex
+    container_name: pokestop-pokedex-service
     environment:
-      PORT: 3003
-      JWT_SECRET: ${JWT_SECRET:-pokesecret}
+      - PORT=3003
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=enter
+      - DB_NAME=pokestop_pokedex_db
+    depends_on:
+      - db
     networks:
       - pokestop-network
     restart: unless-stopped
 
-
-  # Collection Service (Port 3004)
+  # Collection Service (MongoDB)
   collection-service:
     build:
       context: ./collection-service
       dockerfile: Dockerfile
-    container_name: pokestop-collection
+    container_name: pokestop-collection-service
     environment:
-      PORT: 3004
-      JWT_SECRET: ${JWT_SECRET:-pokesecret}
-      MONGO_HOST: mongodb
-      MONGO_USER: ${MONGO_USER:-root}
-      MONGO_PASSWORD: ${MONGO_PASSWORD:-enter}
-      MONGO_DB: pokestop_collection_db
+      - PORT=3004
+      - MONGO_URI=mongodb://mongodb:27017/pokestop_collection_db
+      - DB_NAME=pokestop_collection_db
+      - POKEDEX_SERVICE_URL=http://pokedex-service:3003
     depends_on:
-      mongodb:
-        condition: service_healthy
+      - mongodb
+      - pokedex-service
     networks:
       - pokestop-network
     restart: unless-stopped
 
-
-  # Encounter Service (Port 3005)
+  # Encounter Service
   encounter-service:
     build:
       context: ./encounter-service
       dockerfile: Dockerfile
-    container_name: pokestop-encounters
+    container_name: pokestop-encounter-service
     environment:
-      PORT: 3005
-      JWT_SECRET: ${JWT_SECRET:-pokesecret}
-      DB_HOST: mysql-db
-      DB_USER: ${DB_USER:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-enter}
-      DB_NAME: pokestop_encounter_db
+      - PORT=3005
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=enter
+      - DB_NAME=pokestop_encounter_db
     depends_on:
-      mysql-db:
-        condition: service_healthy
+      - db
     networks:
       - pokestop-network
     restart: unless-stopped
 
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: pokestop-db
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-enter}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database-schemas:/docker-entrypoint-initdb.d:ro
+    networks:
+      - pokestop-network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+
+  # MongoDB (for Collection Service)
+  mongodb:
+    image: mongo:7.0
+    container_name: pokestop-mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=pokestop_collection_db
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - pokestop-network
+    restart: unless-stopped
 
 networks:
   pokestop-network:
     driver: bridge
-
 
 volumes:
   mysql-data:

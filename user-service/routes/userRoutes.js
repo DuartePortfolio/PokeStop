@@ -3,7 +3,11 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 const authenticator = require("../middleware/authenticator");
 
-// All routes are protected - use /api/auth/register and /api/auth/login instead
+// Internal routes (called by auth-service)
+router.post("/register", userController.register);
+router.post("/validate", userController.validate);
+
+// Protected routes
 router.get("/", authenticator.authenticateToken, authenticator.authorizeRole("admin"), userController.getAllUsers);
 
 // only allow the authenticated user to access their own resource
