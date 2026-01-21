@@ -10,14 +10,18 @@ CREATE TABLE IF NOT EXISTS Encounters (
     id INT AUTO_INCREMENT PRIMARY KEY,
     userId INT NOT NULL COMMENT 'Reference to Users.id from user-service',
     pokemonId INT NOT NULL COMMENT 'Pokedex number of encountered Pokemon',
+    pokemonName VARCHAR(100) NOT NULL,
+    pokemonSprite VARCHAR(255),
+    captureRate INT DEFAULT 45,
     
     -- Basic spawn data
     isShiny BOOLEAN DEFAULT FALSE,
     
     -- Encounter status
-    status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'active, caught, fled',
+    status ENUM('active', 'caught', 'fled', 'skipped') NOT NULL DEFAULT 'active',
     maxAttempts INT NOT NULL DEFAULT 3,
     attemptsUsed INT NOT NULL DEFAULT 0,
+    nickname VARCHAR(50) NULL,
     
     -- Timing
     encounteredAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

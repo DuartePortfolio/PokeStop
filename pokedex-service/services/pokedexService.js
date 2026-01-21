@@ -119,10 +119,61 @@ async function getPokemonSpecies(id) {
     return species;
 }
 
+// Fetch and cache an index of all Pokemon names and ids to support fast prefix searching.
+async function getAllPokemonNames() {
+    const cacheKey = `all-names`;
+    if (cache.has(cacheKey)) {
+        return cache.get(cacheKey);
+    }
+
+    // Fetch in pages of 100 (PokeAPI supports limit up to reasonable values) to avoid request timeouts or rate-limit triggers
+    let all = [];
+    let offset = 0;
+    const pageSize = 100;
+    let total = null;
+
+    while (total === null || offset < total) {
+        const resp = await axios.get(`${POKEAPI_BASE}/pokemon?limit=${pageSize}&offset=${offset}`);
+        const data = resp.data;
+        total = data.count;
+        data.results.forEach((p, i) => {
+            const id = offset + i + 1; // Reliable for this listing
+            all.push({ id, name: p.name, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png` });
+        });
+        offset += pageSize;
+        // Be polite to the PokeAPI
+        await new Promise(r => setTimeout(r, 50));
+    }
+
+    cache.set(cacheKey, all);
+    // Keep the full index cached longer since it's heavier to build
+    setTimeout(() => cache.delete(cacheKey), 24 * 3600000); // 24 hours
+    return all;
+}
+
+async function searchPokemonByPrefix(prefix, limit = 200) {
+    if (!prefix || !prefix.length) return [];
+    const q = prefix.toLowerCase();
+    const all = await getAllPokemonNames();
+    const matches = all.filter(p => p.name.startsWith(q)).slice(0, limit);
+    return matches;
+}
+
 
 async function getRandomPokemon(maxId = 151) {
     const randomId = Math.floor(Math.random() * maxId) + 1;
-    return getPokemonById(randomId);
+    const pokemon = await getPokemonById(randomId);
+    
+    // Also fetch species data to get capture rate
+    try {
+        const species = await getPokemonSpecies(randomId);
+        pokemon.captureRate = species.captureRate;
+    } catch (err) {
+        console.error('Failed to fetch species data:', err.message);
+        pokemon.captureRate = 45; // Default capture rate
+    }
+    
+    return pokemon;
 }
 
 
@@ -176,5 +227,7 @@ module.exports = {
     getPokemonByType,
     getPokemonSpecies,
     getRandomPokemon,
+    getAllPokemonNames,
+    searchPokemonByPrefix,
     clearCache
 };

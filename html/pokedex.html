@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PokéStop — Pokédex</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--pokeball-red:#E3350D;--pokeball-red-dark:#C42D0B;--pokeball-white:#fff;--pokeball-black:#2D2D2D;--shadow:0 4px 15px rgba(0,0,0,0.1)}
+    body{font-family:'Nunito',sans-serif;background:var(--pokeball-white);color:var(--pokeball-black);min-height:100vh;overflow-x:hidden}
+    nav{position:sticky;top:0;background:var(--pokeball-white);box-shadow:var(--shadow);z-index:100;padding:0 20px}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:70px}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pokeball-black)}
+    .logo-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(to bottom,var(--pokeball-red) 50%,var(--pokeball-white) 50%);border:3px solid var(--pokeball-black);position:relative;animation:bounce 2s ease-in-out infinite}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    .logo-text{font-size:1.5em;font-weight:800;color:var(--pokeball-red)}
+    .nav-links{display:flex;gap:30px;list-style:none}
+    .nav-links a{text-decoration:none;color:var(--pokeball-black);font-weight:600;padding:8px 16px;border-radius:20px;transition:all .3s}
+    .nav-links a:hover,.nav-links a.active{background:var(--pokeball-red);color:white}
+    .nav-auth{display:flex;gap:10px}
+
+    .main-content{padding:40px 20px;min-height:calc(100vh - 70px);display:flex;align-items:flex-start;justify-content:center}
+    .container{width:100%;max-width:1200px}
+    .card{background:linear-gradient(135deg,#ffffff,#f8f9fb);border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.08)}
+    .search-bar{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+    .search-bar input, .search-bar select{padding:10px 14px;border-radius:10px;border:1px solid #e6eef7;font-size:1em}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+    .card-pkm{background:#fff;border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center;border:1px solid #f1f5f9;cursor:pointer}
+    .card-pkm img{width:64px;height:64px;image-rendering:pixelated}
+    .card-pkm .meta{display:flex;flex-direction:column}
+    .meta .name{font-weight:700;text-transform:capitalize}
+    .meta .types{font-size:0.85rem;color:#6b7280}
+    .sidebar{margin-left:20px;width:360px}
+    .details{background:#fff;border-radius:12px;padding:16px;border:1px solid #f1f5f9}
+    .details h2{margin-bottom:6px}
+
+    @media (max-width: 900px){.main{display:block}.sidebar{width:auto;margin-left:0;margin-top:16px}}
+    .hidden{display:none!important}
+
+    /* Ta-da star effect */
+    .tada-star{position:absolute;top:8px;right:8px;font-size:28px;opacity:0;transform:scale(0.4) rotate(-20deg);pointer-events:none}
+    .tada-star.animate{animation:ta-da 900ms ease forwards}
+    @keyframes ta-da{0%{transform:scale(0.4) rotate(-20deg);opacity:0}30%{transform:scale(1.2) rotate(20deg);opacity:1}60%{transform:scale(1) rotate(-8deg)}100%{transform:scale(1) rotate(0);opacity:0}}
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon"></div>
+        <span class="logo-text">PokéStop</span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="encounter.html">Catch Pokémon</a></li>
+        <li><a href="collections.html">Collection</a></li>
+        <li><a href="pokedex.html">Pokédex</a></li>
+        <li><a href="#">Teams</a></li>
+      </ul>
+
+      <!-- Show when NOT logged in -->
+      <div class="nav-auth" id="authButtons">
+        <a href="login.html" class="btn-nav btn-nav-outline">Log In</a>
+        <a href="register.html" class="btn-nav btn-nav-filled">Sign Up</a>
+      </div>
+
+      <!-- Show when logged in -->
+      <div class="user-welcome hidden" id="userWelcome">
+        <span>👋 Welcome, <span id="username">Trainer</span>!</span>
+        <button class="btn-logout" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="card">
+        <h1>Pokédex</h1>
+        <p class="subtitle">Browse every Pokémon from the PokéAPI — search, filter by type, and view details.</p>
+
+        <div class="search-bar">
+          <input id="searchInput" placeholder="Search by name or # (e.g. pikachu or 25)" />
+          <select id="typeFilter"><option value="">All types</option></select>
+          <button id="clearBtn">Clear</button>
+        </div>
+
+        <div class="main" style="display:flex;align-items:flex-start;gap:20px">
+          <div style="flex:1">
+            <div id="listGrid" class="grid"></div>
+            <div style="text-align:center;margin-top:12px">
+              <button id="loadMoreBtn">Load more</button>
+            </div>
+          </div>
+
+          <!-- Details modal (hidden until needed) -->
+  <div id="modalOverlay" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:200">
+    <div id="modal" tabindex="0" style="background:#fff;border-radius:12px;padding:16px;max-width:820px;width:92%;max-height:80vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.4);position:relative">
+      <div id="modalContent">Select a Pokémon to see details</div>
+    </div>
+  </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+// Auth helpers
+function getAuthToken(){return localStorage.getItem('authToken');}
+function getUserFromToken(){const token = getAuthToken(); if(token){try{return JSON.parse(atob(token.split('.')[1]));}catch(e){return null}} return null}
+
+function updateNavForAuth(){ const user=getUserFromToken(); const authButtons=document.getElementById('authButtons'); const userWelcome=document.getElementById('userWelcome'); const usernameEl=document.getElementById('username'); if(user){authButtons.classList.add('hidden'); userWelcome.classList.remove('hidden'); usernameEl.textContent=user.username||'Trainer'} else {authButtons.classList.remove('hidden'); userWelcome.classList.add('hidden')}}
+function logout(){localStorage.removeItem('authToken'); updateNavForAuth(); window.location.href='login.html'}
+document.getElementById('logoutBtn').addEventListener('click', logout);
+updateNavForAuth();
+
+// Dynamically set active nav link
+(function setActiveNavLink(){const raw=window.location.pathname.split('/').pop()||'index.html'; const current=raw.split('?')[0].split('#')[0]||'index.html'; document.querySelectorAll('.nav-links a').forEach(a=>{const href=a.getAttribute('href')||''; if(!href||href.startsWith('#'))return; const file=href.split('/').pop(); a.classList.toggle('active', file===current);});})();
+
+// Pokedex logic
+const API_BASE = '/api/pokedex';
+let limit = 50, offset = 0, loading = false, searchTimer = null;
+const detailCache = new Map();
+
+const listGrid = document.getElementById('listGrid');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const searchInput = document.getElementById('searchInput');
+const typeFilter = document.getElementById('typeFilter');
+const clearBtn = document.getElementById('clearBtn');
+let lastFocusedEl = null;
+
+async function fetchList(){
+  if(loading) return; loading=true; loadMoreBtn.disabled=true; loadMoreBtn.textContent='Loading...';
+  try{
+    const res = await fetch(`${API_BASE}/pokemon?limit=${limit}&offset=${offset}`);
+    if(!res.ok) throw new Error('Failed to load list');
+    const data = await res.json();
+    renderList(data.pokemon);
+    offset += limit;
+    // hide load more if we've loaded all
+    if(offset >= data.count){loadMoreBtn.style.display='none'} else {loadMoreBtn.style.display='inline-block'}
+  }catch(err){console.error(err); alert('Failed to fetch Pokemon list')}
+  loading=false; loadMoreBtn.disabled=false; loadMoreBtn.textContent='Load more';
+}
+
+function renderList(items){
+  items.forEach(p=>{
+    const el = document.createElement('div'); el.className='card-pkm'; el.dataset.id = p.id;
+    el.innerHTML = `<img src="${p.sprite}" alt="${p.name}"><div class="meta"><div class="name">${escapeHtml(p.name)}</div><div class="types">#${p.id}</div></div>`;
+    el.addEventListener('click', ()=> showDetails(p.id));
+    listGrid.appendChild(el);
+  })
+}
+
+async function showDetails(id){
+  const overlay = document.getElementById('modalOverlay');
+  const modalContent = document.getElementById('modalContent');
+  const modal = document.getElementById('modal');
+  lastFocusedEl = document.activeElement;
+  overlay.classList.remove('hidden');
+  // move focus into the modal for accessibility
+  modal.focus();
+  modalContent.innerHTML = 'Loading details...';
+  if(detailCache.has(id)){
+    renderDetails(detailCache.get(id));
+    return;
+  }
+  try{
+    const [pRes, sRes] = await Promise.all([
+      fetch(`${API_BASE}/pokemon/${id}`).then(r=>{if(!r.ok)throw new Error('Not found');return r.json()}),
+      fetch(`${API_BASE}/pokemon/${id}/species`).then(r=>r.ok?r.json():null)
+    ]);
+    const combined = { ...pRes, species: sRes };
+    detailCache.set(id, combined);
+    renderDetails(combined);
+  }catch(err){console.error(err); modalContent.innerHTML='Failed to load details';}
+}
+
+// Modal close behavior
+(function setupModal(){
+  const overlay = document.getElementById('modalOverlay');
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') closeModal();
+  });
+})();
+
+function closeModal(){
+  const overlay = document.getElementById('modalOverlay');
+  const modalContent = document.getElementById('modalContent');
+  overlay.classList.add('hidden');
+  modalContent.innerHTML = '';
+  // restore focus to previous element
+  if (lastFocusedEl && typeof lastFocusedEl.focus === 'function') {
+    try { lastFocusedEl.focus(); } catch (e) { /* ignore */ }
+  }
+  lastFocusedEl = null;
+}
+
+function renderDetails(p){
+  const types = p.types.map(t=>`<span style="text-transform:capitalize">${t}</span>`).join(', ');
+  const abilities = p.abilities.map(a=>`${escapeHtml(a.name)}${a.isHidden? ' (hidden)':''}`).join(', ');
+  const modalContent = document.getElementById('modalContent');
+  const normalSrc = p.sprites.artwork || p.sprites.front || '';
+  const shinySrc = p.sprites.frontShiny || p.sprites.backShiny || '';
+  modalContent.innerHTML = `
+    <div style="display:flex;gap:12px;align-items:center">
+      <div id="pkmnImgWrap" style="position:relative">
+        <img id="pkmnImage" src="${normalSrc}" width="140" style="image-rendering:pixelated">
+      </div>
+      <div style="flex:1">
+        <h2 style="text-transform:capitalize;margin:0">${escapeHtml(p.name)} <small id="pkmnNumber" style="color:#6b7280;cursor:pointer;user-select:none">#${p.id}</small></h2>
+        <div style="color:#6b7280;margin-top:6px">${types}</div>
+        <div style="margin-top:8px"><strong>Height:</strong> ${p.height}m · <strong>Weight:</strong> ${p.weight}kg</div>
+        <div style="margin-top:6px"><strong>Stats:</strong> HP ${p.stats.hp} · Atk ${p.stats.attack} · Def ${p.stats.defense} · SpA ${p.stats.spAttack} · SpD ${p.stats.spDefense} · Spe ${p.stats.speed}</div>
+        <div style="margin-top:8px"><strong>Abilities:</strong> ${abilities}</div>
+        <div style="margin-top:8px">${p.species?.flavorText? '<em>'+escapeHtml(p.species.flavorText)+'</em>':''}</div>
+      </div>
+    </div>
+  `;
+
+  // Add click handler to toggle shiny
+  const numEl = document.getElementById('pkmnNumber');
+  const imgEl = document.getElementById('pkmnImage');
+  const imgWrap = document.getElementById('pkmnImgWrap');
+  const modal = document.getElementById('modal');
+  modal.dataset.shiny = 'false';
+  numEl.addEventListener('click', () => {
+    const isShiny = modal.dataset.shiny === 'true';
+    // If no shiny sprite available, flash a small ta-da but do not change
+    if (!shinySrc) {
+      showTaDa(imgWrap);
+      return;
+    }
+    if (!isShiny) {
+      imgEl.src = shinySrc;
+      modal.dataset.shiny = 'true';
+    } else {
+      imgEl.src = normalSrc;
+      modal.dataset.shiny = 'false';
+    }
+    showTaDa(imgWrap);
+  });
+}
+
+// Types filter
+async function loadTypes(){
+  try{
+    const res = await fetch(`${API_BASE}/types`);
+    if(!res.ok) throw new Error('Types failed');
+    const data = await res.json();
+    data.types.forEach(t=>{ const opt=document.createElement('option'); opt.value=t; opt.textContent=t; typeFilter.appendChild(opt); });
+  }catch(err){console.error('Failed to load types', err)}
+}
+
+// Search handling (debounced)
+searchInput.addEventListener('input', ()=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(handleSearch, 300);
+});
+clearBtn.addEventListener('click', ()=>{searchInput.value=''; typeFilter.value=''; listGrid.innerHTML=''; offset=0; loadMoreBtn.style.display='inline-block'; fetchList();});
+
+async function handleSearch(){
+  const q = searchInput.value.trim(); const type = typeFilter.value;
+  // If type filter applied, fetch by type and optionally filter by prefix
+  if(type){
+    listGrid.innerHTML=''; loadMoreBtn.style.display='none';
+    try{
+      const res = await fetch(`${API_BASE}/types/${type}`);
+      if(!res.ok) throw new Error('Type fetch failed');
+      const data = await res.json();
+      let pokemon = data.pokemon;
+      if(q) pokemon = pokemon.filter(p => p.name.startsWith(q.toLowerCase()));
+      if(!pokemon.length) { listGrid.innerHTML='<div class="muted">No results</div>'; return }
+      renderList(pokemon);
+    }catch(err){console.error(err); alert('Failed to fetch by type')}
+    return;
+  }
+
+  if(!q){ listGrid.innerHTML=''; offset=0; fetchList(); return }
+
+  // If numeric ID, fetch by id
+  listGrid.innerHTML=''; loadMoreBtn.style.display='none';
+  try{
+    if(/^[0-9]+$/.test(q)){
+      const r = await fetch(`${API_BASE}/pokemon/${q}`);
+      if(!r.ok) throw new Error('Not found');
+      const data = await r.json();
+      renderList([ { id: data.id, name: data.name, sprite: data.sprites.front } ]);
+      return;
+    }
+
+    // Use server-side prefix search (efficient and cached)
+    const sr = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}&limit=200`);
+    if(!sr.ok) throw new Error('Search failed');
+    const results = await sr.json();
+    if(!results.results || !results.results.length) { listGrid.innerHTML='<div class="muted">No results</div>'; return }
+    renderList(results.results);
+  }catch(err){console.error(err); listGrid.innerHTML='<div class="muted">No results</div>' }
+}
+
+// Show ta-da star on shiny toggle
+function showTaDa(container){
+  const star = document.createElement('div');
+  star.className = 'tada-star';
+  star.textContent = '✨';
+  // position relative to container
+  container.style.position = container.style.position || 'relative';
+  container.appendChild(star);
+  // Force reflow then add animation class
+  void star.offsetWidth;
+  star.classList.add('animate');
+  star.addEventListener('animationend', () => {
+    try { star.remove(); } catch (e) {}
+  });
+}
+
+// Utility
+function escapeHtml(s){return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);}
+
+// Load initial
+loadTypes(); fetchList();
+loadMoreBtn.addEventListener('click', fetchList);
+
+</script>
+</body>
+</html>

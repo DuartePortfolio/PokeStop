@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log in</title>
-    <link rel="stylesheet" href="../styles/register.css">
+    <link rel="stylesheet" href="/styles/register.css">
 </head>
 <body>
     <main class="page">
@@ -57,8 +57,9 @@
             if (!ok) return;
 
             // Call API Gateway for authentication
+            const API_BASE = 'http://localhost'; // NGINX gateway
             try {
-                const res = await fetch('/api/auth/login', {
+                const res = await fetch(`${API_BASE}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: usernameEl.value, password: passwordEl.value })
@@ -76,7 +77,8 @@
                     localStorage.setItem('authToken', json.token);
                 }
                 form.reset();
-                console.log(json);
+                // Redirect to home page
+                window.location.href = 'index.html';
             } catch (err) {
                 showError(passwordEl, 'Network error');
             }

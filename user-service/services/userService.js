@@ -27,7 +27,7 @@ async function validateUser(username, password) {
   const user = await User.findOne({ where: { username } });
   if (!user) return false;
   const match = await bcrypt.compare(password, user.password);
-  return match ? { id: user.id, username: user.username, displayName: user.displayName } : false;
+  return match ? { id: user.id, username: user.username, displayName: user.displayName, role: user.role } : false;
 }
 
 async function deleteUser(id) {

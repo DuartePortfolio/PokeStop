@@ -14,5 +14,6 @@ router.get("/types/:type", pokedexController.getPokemonByType);
 
 // Utility endpoints (for other services)
 router.get("/random", pokedexController.getRandomPokemon);
+router.get("/search", pokedexController.searchPokemon);
 
 module.exports = router;

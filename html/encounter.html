@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokéStop — Catch Pokémon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --pokeball-red: #E3350D;
+      --pokeball-red-dark: #C42D0B;
+      --pokeball-white: #FFFFFF;
+      --pokeball-black: #2D2D2D;
+      --pokeball-gray: #F5F5F5;
+      --accent-yellow: #FFCB05;
+      --accent-blue: #3B5CA8;
+      --success-green: #4CAF50;
+      --shadow: 0 4px 15px rgba(0,0,0,0.1);
+      --shadow-hover: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Navigation */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.98);
+      box-shadow: var(--shadow);
+      z-index: 100;
+      padding: 0 20px;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, var(--pokeball-red) 50%, var(--pokeball-white) 50%);
+      border: 3px solid var(--pokeball-black);
+      position: relative;
+    }
+
+    .logo-icon::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--pokeball-black);
+      transform: translateY(-50%);
+    }
+
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: var(--pokeball-white);
+      border: 3px solid var(--pokeball-black);
+      border-radius: 50%;
+    }
+
+    .logo-text {
+      font-size: 1.5em;
+      font-weight: 800;
+      color: var(--pokeball-red);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--pokeball-black);
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: var(--pokeball-red);
+      color: white;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-info span {
+      color: var(--pokeball-black);
+      font-weight: 600;
+    }
+
+    .btn-nav {
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: 2px solid var(--pokeball-red);
+      color: var(--pokeball-red);
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1em;
+    }
+
+    .btn-nav:hover {
+      background: var(--pokeball-red);
+      color: white;
+    }
+
+    /* Main Content */
+    .main-content {
+      position: relative;
+      z-index: 1;
+      padding: 40px 20px;
+      min-height: calc(100vh - 70px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-container {
+      background: rgba(255,255,255,0.95);
+      border-radius: 30px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      color: var(--pokeball-black);
+      text-align: center;
+    }
+
+    .game-container h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+      color: var(--pokeball-red);
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1.1em;
+      margin-bottom: 30px;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      padding: 20px 15px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .stat-card .stat-value {
+      font-size: 2em;
+      font-weight: 800;
+      color: var(--pokeball-red);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.85em;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 15px 40px;
+      background: linear-gradient(135deg, var(--pokeball-red), var(--pokeball-red-dark));
+      color: white;
+      font-size: 1.2em;
+      font-weight: 700;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(227,53,13,0.3);
+      font-family: inherit;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(227,53,13,0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d, #5a6268);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      box-shadow: 0 5px 20px rgba(220,53,69,0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success-green), #43a047);
+      box-shadow: 0 5px 20px rgba(76,175,80,0.3);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn-small {
+      padding: 12px 25px;
+      font-size: 1em;
+    }
+
+    /* Pokemon Display */
+    .pokemon-showcase {
+      position: relative;
+      margin: 20px 0;
+      pointer-events: none;
+    }
+
+    .pokemon-sprite-container {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+      background: radial-gradient(circle, rgba(255,203,5,0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pokemon-sprite {
+      width: 150px;
+      height: 150px;
+      image-rendering: pixelated;
+    }
+
+    .pokemon-name {
+      font-size: 1.8em;
+      font-weight: 800;
+      text-transform: capitalize;
+      margin: 15px 0 5px;
+      color: var(--pokeball-black);
+    }
+
+    .shiny-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 700;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      background: #f0f0f0;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.95em;
+      margin-top: 10px;
+      color: #555;
+    }
+
+    .attempts-display {
+      font-size: 1.5em;
+      margin: 20px 0;
+      letter-spacing: 5px;
+    }
+
+    .instructions {
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      padding: 15px 20px;
+      border-radius: 15px;
+      color: #1565c0;
+      font-weight: 600;
+      margin: 20px 0;
+      border-left: 4px solid #1565c0;
+    }
+
+    /* Pokeball Minigame Container */
+    .minigame-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .pokeball-container {
+      position: relative;
+      width: 140px;
+      height: 380px;
+      background: linear-gradient(to bottom, 
+        var(--pokeball-red) 0%, var(--pokeball-red) 47%, 
+        #222 47%, #222 53%, 
+        #f5f5f5 53%, #f5f5f5 100%);
+      border-radius: 70px;
+      border: 5px solid #222;
+      overflow: hidden;
+    }
+
+    .pokeball-inner {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      background: linear-gradient(to bottom, 
+        rgba(255,150,150,0.4) 0%, 
+        rgba(200,220,255,0.3) 50%, 
+        rgba(220,220,220,0.4) 100%);
+      border-radius: 58px;
+      overflow: hidden;
+    }
+
+    .energy-field {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 8px,
+        rgba(100, 200, 255, 0.12) 8px,
+        rgba(100, 200, 255, 0.12) 10px
+      );
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .focus-zone {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 0;
+      height: 80px;
+      background: rgba(76, 175, 80, 0.4);
+      border: 3px solid rgba(76, 175, 80, 0.7);
+      border-radius: 12px;
+      will-change: transform;
+    }
+
+    .focus-zone.active {
+      background: rgba(76, 175, 80, 0.6);
+      border-color: rgba(76, 175, 80, 1);
+    }
+
+    .pokemon-icon {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 55px;
+      height: 55px;
+      image-rendering: pixelated;
+      will-change: transform;
+    }
+
+    .pokemon-icon.contained {
+      filter: drop-shadow(0 0 10px rgba(76, 175, 80, 1));
+    }
+
+    .pokemon-icon.struggling {
+      filter: drop-shadow(0 0 10px rgba(244, 67, 54, 1));
+    }
+
+    .pokeball-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 35px;
+      height: 35px;
+      background: #fff;
+      border: 5px solid #222;
+      border-radius: 50%;
+      z-index: 10;
+    }
+
+    .pokeball-button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: #f5f5f5;
+      border: 3px solid #ccc;
+      border-radius: 50%;
+    }
+
+    .struggle-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(244, 67, 54, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      border-radius: 58px;
+    }
+
+    .struggle-flash.active {
+      opacity: 1;
+    }
+
+    /* Capture Progress Bar */
+    .capture-meter {
+      width: 100%;
+      max-width: 280px;
+      height: 30px;
+      background: #2d2d2d;
+      border-radius: 15px;
+      border: 3px solid #222;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 3px 10px rgba(0,0,0,0.3);
+    }
+
+    .capture-fill {
+      height: 100%;
+      width: 50%;
+      background: #ff9800;
+      border-radius: 12px;
+      will-change: width;
+    }
+
+    .capture-fill.low {
+      background: #f44336;
+    }
+
+    .capture-fill.high {
+      background: #4caf50;
+    }
+
+    .capture-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-weight: 800;
+      text-shadow: 1px 1px 3px #000;
+      font-size: 1em;
+    }
+
+    .minigame-hint {
+      color: #666;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+
+    /* Result Screens */
+    .result-message {
+      font-size: 1.4em;
+      font-weight: 800;
+      margin: 25px 0;
+      padding: 20px;
+      border-radius: 15px;
+    }
+
+    .result-sub {
+      font-size: 0.75em;
+      font-weight: 600;
+      margin-top: 8px;
+      opacity: 0.85;
+    }
+
+    .lucky-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: white;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.7em;
+      margin-top: 10px;
+      animation: none;
+    }
+
+    .result-success {
+      background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+      color: #2e7d32;
+      border: 2px solid #4caf50;
+    }
+
+    .result-fail {
+      background: linear-gradient(135deg, #ffcdd2, #ef9a9a);
+      color: #c62828;
+      border: 2px solid #f44336;
+    }
+
+    /* Nickname Form */
+    .nickname-form {
+      margin: 25px 0;
+    }
+
+    .nickname-form p {
+      margin-bottom: 15px;
+      color: #555;
+    }
+
+    .nickname-form input {
+      padding: 12px 20px;
+      font-size: 1em;
+      border-radius: 25px;
+      border: 2px solid #ddd;
+      width: 100%;
+      max-width: 250px;
+      margin-bottom: 15px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .nickname-form input:focus {
+      outline: none;
+      border-color: var(--pokeball-red);
+    }
+
+    /* Screen shake */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
+    }
+
+    .shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .nav-links {
+        display: none;
+      }
+
+      .game-container {
+        padding: 25px;
+        margin: 10px;
+      }
+
+      .game-container h1 {
+        font-size: 1.6em;
+      }
+
+      .pokemon-sprite {
+        width: 120px;
+        height: 120px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon"></div>
+        <span class="logo-text">PokéStop</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="encounter.html" class="active">Catch Pokémon</a></li>
+        <li><a href="collections.html">Collection</a></li>
+        <li><a href="pokedex.html">Pokédex</a></li>
+        <li><a href="#">Teams</a></li>
+      </ul>
+
+      <div class="user-info">
+        <span>👋 <span id="username">Trainer</span></span>
+        <button class="btn-nav" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="game-container">
+      
+      <!-- Start Screen -->
+      <div id="startScreen">
+        <h1>🎮 Catch Pokémon!</h1>
+        <p class="subtitle">Test your skills and catch wild Pokémon in our interactive minigame!</p>
+        
+        <button id="startBtn" class="btn">🔍 Find Wild Pokémon!</button>
+        
+        <div class="stats-grid" id="statsDisplay">
+          <div class="stat-card">
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Encounters</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statCaught">0</div>
+            <div class="stat-label">Caught</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statRate">0%</div>
+            <div class="stat-label">Catch Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statShinies">0</div>
+            <div class="stat-label">✨ Shinies</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Encounter Screen -->
+      <div id="encounterScreen" class="hidden">
+        <h1>⚡ Wild Pokémon!</h1>
+        <p class="subtitle">A wild Pokémon appeared!</p>
+        
+        <div class="pokemon-showcase">
+          <div class="pokemon-sprite-container">
+            <img id="pokemonSprite" class="pokemon-sprite" src="" alt="Wild Pokemon">
+          </div>
+          <div class="pokemon-name" id="pokemonName"></div>
+          <span id="shinyBadge" class="shiny-badge hidden">✨ SHINY!</span>
+          <div class="difficulty-badge" id="catchDifficulty"></div>
+        </div>
+        
+        <div class="attempts-display">
+          <span id="attemptsDisplay"></span>
+        </div>
+        
+        <div class="instructions">
+          💡 Hold SPACE or tap to push the focus zone UP!<br>
+          Keep the Pokémon contained to fill the capture bar!
+        </div>
+        
+        <button id="throwBtn" class="btn">🔴 Throw Pokéball!</button>
+        
+        <div class="btn-group">
+          <button id="skipBtn" class="btn btn-small btn-danger">🏃 Run Away</button>
+        </div>
+      </div>
+
+      <!-- Minigame Screen -->
+      <div id="minigameScreen" class="hidden">
+        <div class="pokemon-name" id="pokemonName2" style="margin-bottom: 5px;"></div>
+        <span id="shinyBadge2" class="shiny-badge hidden">✨</span>
+        
+        <div class="minigame-wrapper">
+          <div class="pokeball-container" id="pokeballContainer">
+            <div class="pokeball-inner">
+              <div class="energy-field"></div>
+              <div class="focus-zone" id="focusZone"></div>
+              <img id="pokemonIcon" class="pokemon-icon" src="" alt="">
+              <div class="struggle-flash" id="struggleFlash"></div>
+            </div>
+            <div class="pokeball-button"></div>
+          </div>
+          
+          <div class="capture-meter">
+            <div class="capture-fill" id="captureFill"></div>
+            <div class="capture-label" id="captureLabel">50%</div>
+          </div>
+          
+          <p class="minigame-hint">Hold to raise focus • Release to lower</p>
+        </div>
+      </div>
+
+      <!-- Result Screen -->
+      <div id="resultScreen" class="hidden">
+        <div class="pokemon-showcase">
+          <div class="pokemon-sprite-container">
+            <img id="pokemonSprite3" class="pokemon-sprite" src="" alt="Pokemon">
+          </div>
+          <div class="pokemon-name" id="pokemonName3"></div>
+          <span id="shinyBadge3" class="shiny-badge hidden">✨ SHINY!</span>
+        </div>
+        
+        <div id="resultMessage" class="result-message"></div>
+        
+        <div id="nicknameSection" class="nickname-form hidden">
+          <p>Give your new friend a nickname?</p>
+          <input type="text" id="nicknameInput" placeholder="Nickname (optional)" maxlength="20">
+          <button id="confirmCatchBtn" class="btn btn-success">✓ Add to Collection</button>
+        </div>
+        
+        <div class="btn-group" id="resultButtons">
+          <button id="newEncounterBtn" class="btn">🔍 Find Another</button>
+          <button id="viewCollectionBtn" class="btn btn-small btn-secondary">📦 View Collection</button>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+<script>
+const API_BASE = '/api/encounters';
+
+// Auth helpers
+function getAuthToken() {
+  return localStorage.getItem('authToken');
+}
+
+function getUserFromToken() {
+  const token = getAuthToken();
+  if (token) {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+// Check auth on load
+const user = getUserFromToken();
+if (!user) {
+  alert('Please log in first');
+  window.location.href = '/login.html';
+} else {
+  document.getElementById('username').textContent = user.username || 'Trainer';
+}
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('authToken');
+  window.location.href = '/login.html';
+});
+
+// Dynamically set the active nav link based on the current URL
+(function setActiveNavLink(){
+  const raw = window.location.pathname.split('/').pop() || 'index.html';
+  const current = raw.split('?')[0].split('#')[0] || 'index.html';
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (!href || href.startsWith('#')) return;
+    const file = href.split('/').pop();
+    a.classList.toggle('active', file === current);
+  });
+})();
+
+// API helpers
+async function apiCall(endpoint, method = 'GET', body = null) {
+  const options = {
+    method,
+    headers: {
+      'Authorization': `Bearer ${getAuthToken()}`,
+      'Content-Type': 'application/json'
+    }
+  };
+  if (body) options.body = JSON.stringify(body);
+  
+  const res = await fetch(`${API_BASE}${endpoint}`, options);
+  const data = await res.json();
+  
+  if (!res.ok) throw new Error(data.message || 'API error');
+  return data;
+}
+
+// ============================================
+// MINIGAME PHYSICS & STATE
+// ============================================
+
+const CONTAINER_HEIGHT = 356;
+
+let focusY = 150;
+let focusVelocity = 0;
+const focusHeight = 80;
+const gravity = 0.2;
+const focusForce = 0.4;
+const maxVelocity = 5;
+
+let pokemonY = 100;
+let pokemonVelocity = 0;
+let targetY = 100;
+let struggleIntensity = 0.015;
+let pokemonDamping = 0.98;
+let directionChangeTimer = 0;
+let directionChangeInterval = 180;
+
+let captureProgress = 50;
+let peakProgress = 50;
+const stabilizeRate = 0.5;
+const escapeRate = 0.35;
+
+let currentEncounter = null;
+let minigameActive = false;
+let holding = false;
+let gameLoop = null;
+let isShaking = false; // Debounce for shake effect
+
+// DOM elements - cached for performance
+const startScreen = document.getElementById('startScreen');
+const encounterScreen = document.getElementById('encounterScreen');
+const minigameScreen = document.getElementById('minigameScreen');
+const resultScreen = document.getElementById('resultScreen');
+
+// Minigame DOM elements - cached to avoid lookups in game loop
+let focusZoneEl, pokemonIconEl, struggleFlashEl, pokeballContainerEl, captureFillEl, captureLabelEl;
+
+// ============================================
+// DIFFICULTY SCALING
+// ============================================
+
+function setupDifficulty(captureRate) {
+  if (captureRate >= 200) {
+    struggleIntensity = 0.0015;
+    pokemonDamping = 0.995;
+    directionChangeInterval = 600;
+  } else if (captureRate >= 150) {
+    struggleIntensity = 0.002;
+    pokemonDamping = 0.993;
+    directionChangeInterval = 500;
+  } else if (captureRate >= 100) {
+    struggleIntensity = 0.003;
+    pokemonDamping = 0.991;
+    directionChangeInterval = 400;
+  } else if (captureRate >= 50) {
+    struggleIntensity = 0.004;
+    pokemonDamping = 0.989;
+    directionChangeInterval = 320;
+  } else if (captureRate >= 20) {
+    struggleIntensity = 0.005;
+    pokemonDamping = 0.987;
+    directionChangeInterval = 240;
+  } else {
+    struggleIntensity = 0.007;
+    pokemonDamping = 0.985;
+    directionChangeInterval = 180;
+  }
+}
+
+function getCatchDifficulty(captureRate) {
+  if (captureRate >= 200) return '⭐ Very Easy';
+  if (captureRate >= 150) return '⭐⭐ Easy';
+  if (captureRate >= 100) return '⭐⭐⭐ Medium';
+  if (captureRate >= 50) return '⭐⭐⭐⭐ Hard';
+  if (captureRate >= 20) return '⭐⭐⭐⭐⭐ Very Hard';
+  return '💀 LEGENDARY';
+}
+
+// ============================================
+// INITIALIZE
+// ============================================
+
+async function init() {
+  try {
+    const active = await apiCall('/active');
+    if (active) {
+      currentEncounter = active;
+      showEncounterScreen();
+    }
+  } catch (e) {
+    // No active encounter
+  }
+  loadStats();
+}
+
+async function loadStats() {
+  try {
+    const stats = await apiCall('/stats');
+    document.getElementById('statTotal').textContent = stats.total;
+    document.getElementById('statCaught').textContent = stats.caught;
+    document.getElementById('statRate').textContent = stats.catchRate + '%';
+    document.getElementById('statShinies').textContent = stats.shinies;
+  } catch (e) {
+    console.error('Failed to load stats');
+  }
+}
+
+// ============================================
+// SCREEN MANAGEMENT
+// ============================================
+
+function showScreen(screen) {
+  startScreen.classList.add('hidden');
+  encounterScreen.classList.add('hidden');
+  minigameScreen.classList.add('hidden');
+  resultScreen.classList.add('hidden');
+  screen.classList.remove('hidden');
+}
+
+function showEncounterScreen() {
+  const pokemon = currentEncounter.pokemon;
+  
+  document.getElementById('pokemonSprite').src = pokemon.sprite;
+  document.getElementById('pokemonName').textContent = pokemon.name;
+  document.getElementById('shinyBadge').classList.toggle('hidden', !pokemon.isShiny);
+  document.getElementById('catchDifficulty').textContent = getCatchDifficulty(pokemon.captureRate);
+  
+  updateAttemptsDisplay(currentEncounter.attemptsRemaining);
+  showScreen(encounterScreen);
+}
+
+function updateAttemptsDisplay(remaining) {
+  const display = document.getElementById('attemptsDisplay');
+  display.innerHTML = '🔴'.repeat(remaining) + '⚪'.repeat(3 - remaining);
+}
+
+// ============================================
+// MINIGAME CORE
+// ============================================
+
+function startMinigame() {
+  const pokemon = currentEncounter.pokemon;
+  
+  // Cache DOM elements for the game loop (only once per minigame)
+  focusZoneEl = document.getElementById('focusZone');
+  pokemonIconEl = document.getElementById('pokemonIcon');
+  struggleFlashEl = document.getElementById('struggleFlash');
+  pokeballContainerEl = document.getElementById('pokeballContainer');
+  captureFillEl = document.getElementById('captureFill');
+  captureLabelEl = document.getElementById('captureLabel');
+  
+  pokemonIconEl.src = pokemon.sprite;
+  document.getElementById('pokemonName2').textContent = pokemon.name;
+  document.getElementById('shinyBadge2').classList.toggle('hidden', !pokemon.isShiny);
+  
+  setupDifficulty(pokemon.captureRate);
+  
+  focusY = CONTAINER_HEIGHT / 2;
+  focusVelocity = 0;
+  pokemonY = CONTAINER_HEIGHT / 2;
+  pokemonVelocity = 0;
+  targetY = Math.random() * (CONTAINER_HEIGHT - 50);
+  captureProgress = 50;
+  peakProgress = 50;
+  holding = false;
+  minigameActive = true;
+  directionChangeTimer = 0;
+  isShaking = false;
+  
+  updateCaptureBar();
+  showScreen(minigameScreen);
+  
+  // Use requestAnimationFrame for smoother performance
+  function loop() {
+    if (minigameActive) {
+      updateMinigame();
+      gameLoop = requestAnimationFrame(loop);
+    }
+  }
+  gameLoop = requestAnimationFrame(loop);
+}
+
+function updateMinigame() {
+  if (!minigameActive) return;
+  
+  // Focus Zone Physics
+  if (holding) {
+    focusVelocity -= focusForce;
+  } else {
+    focusVelocity += gravity;
+  }
+  
+  focusVelocity = Math.max(-maxVelocity, Math.min(maxVelocity, focusVelocity));
+  focusY += focusVelocity;
+  
+  if (focusY < 0) { focusY = 0; focusVelocity = 0; }
+  if (focusY > CONTAINER_HEIGHT - focusHeight) { focusY = CONTAINER_HEIGHT - focusHeight; focusVelocity = 0; }
+  
+  // Pokemon AI
+  directionChangeTimer++;
+  
+  if (directionChangeTimer >= directionChangeInterval) {
+    directionChangeTimer = 0;
+    // Move less distance: restrict targetY closer to current position
+    const behavior = Math.random();
+    let moveRange = CONTAINER_HEIGHT * 0.15; // much less than before
+    if (behavior < 0.3) {
+      targetY = Math.max(0, Math.min(CONTAINER_HEIGHT - 50, pokemonY + (Math.random() - 0.5) * moveRange));
+    } else if (behavior < 0.5) {
+      targetY = Math.max(0, Math.min(CONTAINER_HEIGHT - 50, pokemonY + (Math.random() - 0.5) * moveRange));
+    } else if (behavior < 0.7) {
+      if (pokemonY >= focusY && pokemonY <= focusY + focusHeight) {
+        targetY = Math.random() < 0.5 ? 0 : CONTAINER_HEIGHT - 50;
+      } else {
+        targetY = Math.max(0, Math.min(CONTAINER_HEIGHT - 50, pokemonY + (Math.random() - 0.5) * moveRange));
+      }
+    } else {
+      targetY = Math.max(0, Math.min(CONTAINER_HEIGHT - 50, pokemonY + (Math.random() - 0.5) * moveRange));
+    }
+    // Make direction changes even less frequent
+    directionChangeInterval = directionChangeInterval + Math.random() * directionChangeInterval * 0.5;
+  }
+  // Move less distance per frame
+  const diff = targetY - pokemonY;
+  pokemonVelocity += diff * struggleIntensity * 0.7;
+  pokemonVelocity *= pokemonDamping;
+  pokemonY += pokemonVelocity;
+  pokemonY = Math.max(0, Math.min(CONTAINER_HEIGHT - 55, pokemonY));
+  
+  // Collision Check
+  const pokemonCenterY = pokemonY + 27;
+  const pokemonInsideFocus = pokemonCenterY >= focusY && pokemonCenterY <= focusY + focusHeight;
+  
+  // Capture Progress
+  if (pokemonInsideFocus) {
+    captureProgress += stabilizeRate;
+    focusZoneEl.classList.add('active');
+    pokemonIconEl.classList.add('contained');
+    pokemonIconEl.classList.remove('struggling');
+    struggleFlashEl.classList.remove('active');
+  } else {
+    captureProgress -= escapeRate;
+    focusZoneEl.classList.remove('active');
+    pokemonIconEl.classList.remove('contained');
+    pokemonIconEl.classList.add('struggling');
+    
+    // Debounced shake effect - only trigger if not already shaking
+    if (captureProgress < 30 && !isShaking) {
+      isShaking = true;
+      struggleFlashEl.classList.add('active');
+      pokeballContainerEl.classList.add('shake');
+      setTimeout(() => {
+        struggleFlashEl.classList.remove('active');
+        pokeballContainerEl.classList.remove('shake');
+        isShaking = false;
+      }, 300);
+    }
+  }
+  
+  captureProgress = Math.max(0, Math.min(100, captureProgress));
+  
+  // Track highest progress achieved
+  if (captureProgress > peakProgress) {
+    peakProgress = captureProgress;
+  }
+  
+  // Update Visuals - use cached elements and transforms (GPU accelerated)
+  focusZoneEl.style.transform = `translateY(${focusY}px)`;
+  pokemonIconEl.style.transform = `translate(-50%, ${pokemonY}px)`;
+  updateCaptureBar();
+  
+  // End Conditions
+  if (captureProgress >= 100) {
+    endMinigame(true);
+  } else if (captureProgress <= 0) {
+    endMinigame(false);
+  }
+}
+
+function updateCaptureBar() {
+  captureFillEl.style.width = captureProgress + '%';
+  captureLabelEl.textContent = Math.round(captureProgress) + '%';
+  
+  captureFillEl.classList.remove('low', 'high');
+  if (captureProgress < 30) {
+    captureFillEl.classList.add('low');
+  } else if (captureProgress > 70) {
+    captureFillEl.classList.add('high');
+  }
+}
+
+async function endMinigame(filled) {
+  minigameActive = false;
+  cancelAnimationFrame(gameLoop);
+  
+  // If bar filled = 100, otherwise use peak progress achieved
+  const score = filled ? 100 : Math.round(peakProgress);
+  const wasLuckyCatch = !filled && score < 100;
+  
+  try {
+    const result = await apiCall('/catch', 'POST', {
+      encounterId: currentEncounter.encounterId,
+      score
+    });
+    
+    result.wasLucky = wasLuckyCatch && result.caught;
+    result.finalScore = score;
+    showResultScreen(result);
+  } catch (e) {
+    alert('Error: ' + e.message);
+    showScreen(startScreen);
+  }
+}
+
+function showResultScreen(result) {
+  const pokemon = currentEncounter.pokemon;
+  
+  document.getElementById('pokemonSprite3').src = pokemon.sprite;
+  document.getElementById('pokemonName3').textContent = pokemon.name;
+  document.getElementById('shinyBadge3').classList.toggle('hidden', !pokemon.isShiny);
+  
+  const messageEl = document.getElementById('resultMessage');
+  const nicknameSection = document.getElementById('nicknameSection');
+  
+  if (result.caught) {
+    if (result.wasLucky) {
+      messageEl.innerHTML = `🎉 Gotcha! ${pokemon.name} was caught!<br><span class="lucky-badge">🍀 Lucky Catch! (${result.finalScore}%)</span><div class="result-sub">The Pokéball held despite not being fully contained!</div>`;
+    } else {
+      messageEl.innerHTML = `🎉 Gotcha! ${pokemon.name} was caught!<div class="result-sub">Perfect capture!</div>`;
+    }
+    messageEl.className = 'result-message result-success';
+    nicknameSection.classList.remove('hidden');
+    document.getElementById('resultButtons').classList.add('hidden');
+  } else if (result.fled) {
+    messageEl.textContent = `😢 ${pokemon.name} broke free and fled!`;
+    messageEl.className = 'result-message result-fail';
+    nicknameSection.classList.add('hidden');
+    document.getElementById('resultButtons').classList.remove('hidden');
+  } else {
+    messageEl.textContent = `💨 ${pokemon.name} broke free! (${result.attemptsRemaining} balls left)`;
+    messageEl.className = 'result-message result-fail';
+    nicknameSection.classList.add('hidden');
+    
+    currentEncounter.attemptsRemaining = result.attemptsRemaining;
+    setTimeout(() => showEncounterScreen(), 1500);
+    return;
+  }
+  
+  showScreen(resultScreen);
+}
+
+// ============================================
+// COLLECTION & SPAWNING
+// ============================================
+
+async function addToCollection() {
+  const nickname = document.getElementById('nicknameInput').value.trim();
+  
+  try {
+    await apiCall('/collect', 'POST', {
+      encounterId: currentEncounter.encounterId,
+      nickname: nickname || null
+    });
+    
+    document.getElementById('nicknameSection').classList.add('hidden');
+    document.getElementById('resultButtons').classList.remove('hidden');
+    
+    const pokemonName = nickname || currentEncounter.pokemon.name;
+    document.getElementById('resultMessage').textContent = `🎉 ${pokemonName} was added to your collection!`;
+    
+    currentEncounter = null;
+    document.getElementById('nicknameInput').value = '';
+  } catch (e) {
+    alert('Error adding to collection: ' + e.message);
+  }
+}
+
+async function spawnEncounter() {
+  try {
+    currentEncounter = await apiCall('/spawn', 'POST');
+    showEncounterScreen();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+async function skipEncounter() {
+  if (!confirm('Are you sure you want to run away?')) return;
+  
+  try {
+    await apiCall('/skip', 'POST', { encounterId: currentEncounter.encounterId });
+    currentEncounter = null;
+    showScreen(startScreen);
+    loadStats();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
+document.getElementById('startBtn').addEventListener('click', spawnEncounter);
+document.getElementById('throwBtn').addEventListener('click', () => {
+  // Defer to next frame to prevent input delay
+  requestAnimationFrame(startMinigame);
+});
+document.getElementById('skipBtn').addEventListener('click', skipEncounter);
+document.getElementById('confirmCatchBtn').addEventListener('click', addToCollection);
+document.getElementById('newEncounterBtn').addEventListener('click', () => {
+  loadStats();
+  spawnEncounter();
+});
+document.getElementById('viewCollectionBtn').addEventListener('click', () => {
+  window.location.href = '/collections.html';
+});
+
+// Mouse controls
+document.addEventListener('mousedown', () => {
+  if (minigameActive) holding = true;
+});
+document.addEventListener('mouseup', () => {
+  holding = false;
+});
+
+// Touch controls
+document.addEventListener('touchstart', (e) => {
+  if (minigameActive) {
+    holding = true;
+    e.preventDefault();
+  }
+}, { passive: false });
+document.addEventListener('touchend', () => {
+  holding = false;
+}, { passive: false });
+
+// Keyboard controls
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && minigameActive) {
+    holding = true;
+    e.preventDefault();
+  }
+});
+document.addEventListener('keyup', (e) => {
+  if (e.code === 'Space') {
+    holding = false;
+  }
+});
+
+// Initialize
+init();
+</script>
+</body>
+</html>

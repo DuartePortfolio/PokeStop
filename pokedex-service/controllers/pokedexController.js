@@ -122,3 +122,20 @@ exports.getRandomPokemon = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch random Pokemon' });
     }
 };
+
+/**
+ * GET /pokedex/search?q=
+ * Search Pokemon by name prefix (case-insensitive)
+ */
+exports.searchPokemon = async (req, res) => {
+    try {
+        const q = String(req.query.q || '').trim();
+        if (!q) return res.json({ results: [] });
+        const limit = Math.min(parseInt(req.query.limit) || 200, 500);
+        const results = await pokedexService.searchPokemonByPrefix(q, limit);
+        res.json({ count: results.length, results });
+    } catch (err) {
+        console.error('Error searching Pokemon:', err.message);
+        res.status(500).json({ error: 'Failed to search Pokemon' });
+    }
+};
