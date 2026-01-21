@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log in</title>
     <link rel="stylesheet" href="/styles/register.css">
+    <style>
+      body, .card { transition: background-color .25s ease, color .25s ease }
+      .dark-mode{ --pokeball-white:#071023; --pokeball-black:#e6eef8 }
+      .dark-mode body{ background: linear-gradient(135deg,#071022 0%, #041025 50%, #000814 100%); color:var(--pokeball-black) }
+      .theme-toggle{position:fixed;right:20px;bottom:20px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(2,6,23,0.08);border:2px solid rgba(0,0,0,0.06);cursor:pointer;z-index:999;transition:transform .15s ease, background .2s ease}
+      .theme-toggle .emoji{font-size:22px}
+      .dark-mode .theme-toggle{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08) }
+    </style>
 </head>
 <body>
     <main class="page">
@@ -83,6 +91,18 @@
                 showError(passwordEl, 'Network error');
             }
         });
+
+        // Theme toggle logic (global)
+        (function setupThemeToggle(){
+          // inject button
+          const btn = document.createElement('button');
+          btn.id = 'themeToggle'; btn.className='theme-toggle'; btn.title='Toggle dark mode'; btn.innerHTML='<span class="emoji">🌙</span>';
+          document.body.appendChild(btn);
+          const toggle = btn; const emoji = btn.querySelector('.emoji'); const STORAGE_KEY = 'pokestop_dark_mode_v1';
+          function apply(isDark){ document.documentElement.classList.toggle('dark-mode', !!isDark); emoji.textContent = isDark ? '☀️' : '🌙'; localStorage.setItem(STORAGE_KEY, isDark ? '1' : '0'); }
+          const saved = localStorage.getItem(STORAGE_KEY); apply(saved === '1');
+          toggle.addEventListener('click', ()=>{ const nowDark = !document.documentElement.classList.contains('dark-mode'); apply(nowDark); toggle.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 240, easing: 'ease' }); });
+        })();
 
         // Limpar erros ao digitar
         usernameEl.addEventListener('input', () => showError(usernameEl, ''));

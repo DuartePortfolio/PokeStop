@@ -24,7 +24,11 @@ class CollectionService:
         
         if enrich:
             for pokemon in pokemon_list:
+                # Normalize ObjectId and dates for JSON serialization
                 pokemon["_id"] = str(pokemon["_id"])
+                # Convert capturedAt datetime to ISO string if present
+                if "capturedAt" in pokemon and hasattr(pokemon["capturedAt"], "isoformat"):
+                    pokemon["capturedAt"] = pokemon["capturedAt"].isoformat()
                 pokedex_data = self._get_pokedex_data(pokemon.get("pokemonID"))
                 if pokedex_data:
                     pokemon["pokedexData"] = pokedex_data
@@ -38,6 +42,9 @@ class CollectionService:
         
         if pokemon and enrich:
             pokemon["_id"] = str(pokemon["_id"])
+            # Convert capturedAt datetime to ISO string if present
+            if "capturedAt" in pokemon and hasattr(pokemon["capturedAt"], "isoformat"):
+                pokemon["capturedAt"] = pokemon["capturedAt"].isoformat()
             pokedex_data = self._get_pokedex_data(pokemon.get("pokemonID"))
             if pokedex_data:
                 pokemon["pokedexData"] = pokedex_data
@@ -47,6 +54,10 @@ class CollectionService:
     def add_pokemon_to_user(self, user_id: int, pokemon_data: dict):
         """Add a new Pokemon to user's collection"""
         pokemon_data["userID"] = user_id
+        # Add capturedAt timestamp if not provided
+        if "capturedAt" not in pokemon_data:
+            from datetime import datetime
+            pokemon_data["capturedAt"] = datetime.utcnow()
         res = self.pokemon_instances.insert_one(pokemon_data)
         return res.inserted_id
 

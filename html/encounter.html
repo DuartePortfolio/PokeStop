@@ -68,6 +68,7 @@
       background: linear-gradient(to bottom, var(--pokeball-red) 50%, var(--pokeball-white) 50%);
       border: 3px solid var(--pokeball-black);
       position: relative;
+      animation: bounce 2s ease-in-out infinite;
     }
 
     .logo-icon::before {
@@ -94,6 +95,11 @@
       border-radius: 50%;
     }
 
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
     .logo-text {
       font-size: 1.5em;
       font-weight: 800;
@@ -105,6 +111,21 @@
       gap: 30px;
       list-style: none;
     }
+
+    /* ensure welcome text respects theme colors */
+    .user-welcome span{ color: var(--pokeball-black) !important }
+
+    /* Transitions and dark mode */
+    body, nav, .card, .user-info { transition: background-color .25s ease, color .25s ease, box-shadow .25s ease, border-color .25s ease }
+    .dark-mode{ --pokeball-white:#071023; --pokeball-black:#e6eef8; --shadow:0 8px 30px rgba(0,0,0,0.6) }
+    .dark-mode body{ background: linear-gradient(135deg,#071022 0%, #041025 50%, #000814 100%); color:var(--pokeball-black)}
+    .dark-mode nav{ background: rgba(6,8,14,0.9); box-shadow:var(--shadow)}
+    .dark-mode .card{ background: linear-gradient(135deg,#071022,#0b1220); border:1px solid rgba(255,255,255,0.04) }
+    .dark-mode .card-pkm{ background: linear-gradient(135deg,#071026,#081422); border:1px solid rgba(255,255,255,0.03) }
+    .theme-toggle{position:fixed;right:20px;bottom:20px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(2,6,23,0.08);border:2px solid rgba(0,0,0,0.06);cursor:pointer;z-index:10000;transition:transform .15s ease, background .2s ease}
+    .theme-toggle:hover{ transform: translateY(-4px); }
+    .theme-toggle .emoji{font-size:22px}
+    .dark-mode .theme-toggle{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08) }
 
     .nav-links a {
       text-decoration: none;

@@ -5,6 +5,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Create an account</title>
         <link rel="stylesheet" href="/styles/register.css">
+        <style>
+          body, .card { transition: background-color .25s ease, color .25s ease }
+          .dark-mode{ --pokeball-white:#071023; --pokeball-black:#e6eef8 }
+          .dark-mode body{ background: linear-gradient(135deg,#071022 0%, #041025 50%, #000814 100%); color:var(--pokeball-black) }
+          .theme-toggle{position:fixed;right:20px;bottom:20px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(2,6,23,0.08);border:2px solid rgba(0,0,0,0.06);cursor:pointer;z-index:999;transition:transform .15s ease, background .2s ease}
+          .theme-toggle .emoji{font-size:22px}
+          .dark-mode .theme-toggle{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08) }
+        </style>
 </head>
 <body>
     <main class="page">

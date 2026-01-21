@@ -162,6 +162,9 @@
       list-style: none;
     }
 
+    /* ensure welcome text respects theme colors */
+    .user-welcome span{ color: var(--pokeball-black) !important }
+
     .nav-links a {
       text-decoration: none;
       color: var(--pokeball-black);
@@ -255,14 +258,27 @@
       list-style: none;
       padding: 0;
       margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+      gap: 12px;
     }
     #items li {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #eef2f6;
+      padding: 12px;
+      border-radius: 12px;
+      background: linear-gradient(180deg,#fff,#fbfdff);
+      box-shadow: 0 6px 20px rgba(2,6,23,0.04);
+      transition: transform .15s ease, box-shadow .15s ease;
+      border: 1px solid rgba(230,238,247,0.6);
     }
+    #items li:hover{ transform: translateY(-4px); box-shadow: 0 12px 34px rgba(2,6,23,0.08);}    
+    .poke-sprite{width:56px;height:56px;image-rendering:pixelated;border-radius:8px;border:1px solid #f0f4f8;padding:4px;background:white}
+    .poke-meta{display:flex;flex-direction:column}
+    .poke-meta strong{font-weight:800}
+    .poke-meta .muted{font-size:0.85rem;margin-top:6px}
+    .poke-meta .captured{font-size:0.8rem;color:#64748b;margin-top:6px}
     .muted {
       color: #6b7280;
     }
@@ -272,7 +288,7 @@
       font-size: 1.2em;
     }
     .btn-small {
-      padding: 7px 18px;
+      padding: 7px 14px;
       border-radius: 14px;
       border: none;
       background: linear-gradient(90deg,#ffcc33,#ffb700);
@@ -294,6 +310,58 @@
     .hidden {
       display: none !important;
     }
+
+    /* Smooth transitions for theme changes */
+    body, nav, .card, .poke-meta, #items li { transition: background-color .25s ease, color .25s ease, box-shadow .25s ease, border-color .25s ease }
+
+    /* Dark mode variables and overrides */
+    .dark-mode {
+      --pokeball-white: #071023;
+      --pokeball-black: #e6eef8;
+      --pokeball-gray: #0b1220;
+      --shadow: 0 8px 30px rgba(0,0,0,0.6);
+      --shadow-hover: 0 12px 40px rgba(0,0,0,0.6);
+    }
+
+    .dark-mode body {
+      background: linear-gradient(135deg,#071022 0%, #041025 50%, #000814 100%);
+      color: var(--pokeball-black);
+    }
+
+    .dark-mode nav { background: rgba(6,8,14,0.9); box-shadow: var(--shadow); }
+    .dark-mode .card { background: linear-gradient(135deg,#071022,#0b1220); border:1px solid rgba(255,255,255,0.04); box-shadow:none }
+    .dark-mode .hero-pokeball { box-shadow: none; }
+    .dark-mode .muted { color: #cbd5e6 }
+
+    /* Dark cards for collection list */
+    .dark-mode #items li { background: linear-gradient(135deg,#071026,#0b1222); border:1px solid rgba(255,255,255,0.03) }
+    .dark-mode .poke-meta .muted { color: #cbd5e6 }
+    .dark-mode .id { color: #9fb0c8 }
+
+    /* Slightly brighter sprite border in dark mode */
+    .dark-mode .poke-sprite{ border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02) }
+
+    /* Floating theme toggle */
+    .theme-toggle {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(2,6,23,0.08);
+      border: 2px solid rgba(0,0,0,0.06);
+      cursor: pointer;
+      z-index: 999;
+      transition: transform .15s ease, background .2s ease;
+    }
+    .theme-toggle:hover{ transform: translateY(-4px); }
+    .theme-toggle .emoji{font-size:22px}
+    .dark-mode .theme-toggle{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08) }
   </style>
 </head>
 <body>
@@ -335,8 +403,12 @@
       <h1>My Pokémon Collection</h1>
       <p class="subtitle">Pokémon you've caught in encounters</p>
 
-      <div style="margin-bottom: 20px;">
+      <div style="margin-bottom: 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
         <a href="encounter.html" class="hero-btn">🎮 Catch More Pokémon</a>
+        <div style="flex:1;min-width:220px;">
+          <input id="collectionSearch" placeholder="Search by name or nickname" style="width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef7;font-size:1em" />
+        </div>
+        <div id="collectionCount" class="muted">&nbsp;</div>
       </div>
 
       <div id="list">
@@ -345,6 +417,25 @@
       </div>
     </div>
   </main>
+
+  <!-- Release confirmation modal -->
+  <div id="releaseModal" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:300">
+    <div style="background:#fff;border-radius:10px;padding:18px;max-width:420px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,0.45);display:flex;gap:12px;align-items:center">
+      <img id="releaseSprite" src="" width="64" style="image-rendering:pixelated;border-radius:8px;background:#fff;border:1px solid #f0f4f8;padding:6px">
+      <div style="flex:1">
+        <h3 style="margin:0 0 6px">Release <span id="releaseName">Pokémon</span>?</h3>
+        <div class="muted">Captured: <span id="releaseCaptured">Unknown</span></div>
+        <p style="margin-top:8px">This action cannot be undone.</p>
+        <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+          <button class="btn-small" onclick="closeReleaseModal()">Cancel</button>
+          <button class="btn-small" style="background:linear-gradient(90deg,#ef4444,#dc2626);color:white" onclick="confirmRelease()">Release</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme toggle (bottom-right) -->
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"><span class="emoji">🌙</span></button>
 
 <script>
 
@@ -443,22 +534,29 @@ async function fetchCollection(){
       list.innerHTML = '<li class="muted">No Pokemon in your collection yet.</li>';
       return;
     }
+    // Keep a copy for client-side filtering
+    window._collectionCache = data.pokemon.map(p => ({...p}));
+    document.getElementById('collectionCount').textContent = `${data.count} Pokémon`;
+
     data.pokemon.forEach(p => {
       const li = document.createElement('li');
       li.className = 'pokemon-row';
-      const name = p.pokedexData?.name || `Pokemon #${p.pokemonID}`;
-      const sprite = p.pokedexData?.sprites?.front_default || '';
+      const name = p.pokedexData?.name || `Pokemon #${p.pokemonID || p.pokemonId}`;
+      const sprite = p.pokedexData?.sprites?.front_default || p.pokedexData?.sprites?.front || (p.pokemonID? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.pokemonID}.png` : '');
       const nickname = p.nickname ? `<span class="nickname">"${escapeHtml(p.nickname)}"</span>` : '';
+      const captured = p.capturedAt ? `<div class="captured">Captured: ${new Date(p.capturedAt).toLocaleString()}</div>` : '';
+
       li.innerHTML = `
-        <div class="poke-info">
-          ${sprite ? `<img class="poke-sprite" src="${sprite}" alt="${name}" width="48">` : ''}
-          <div class="poke-meta">
-            <strong>${escapeHtml(name)}</strong> ${nickname}
-            <span class="muted">Lv.${p.level}</span>
-            ${p.isShiny ? '<span class="shiny">✨</span>' : ''}
-          </div>
+        ${sprite ? `<img class="poke-sprite" src="${sprite}" alt="${name}">` : ''}
+        <div style="flex:1">
+          <div class="poke-meta"><strong>${escapeHtml(name)}</strong> ${nickname} ${p.isShiny ? '<span class="shiny">✨</span>' : ''}</div>
+          <div class="muted">Lv.${p.level || '?'} · ${p.types? p.types.join(', '): ''}</div>
+          ${captured}
         </div>
-        <button class="btn btn-small" onclick="releasePokemon('${p._id}')">Release</button>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <div class="id">#${p.pokemonID || p.pokemonId || ''}</div>
+          <button class="btn-small" onclick="openReleaseModal('${p._id}','${escapeHtml(name)}','${sprite.replace(/"/g,'')}', '${p.capturedAt || ''}')">Release</button>
+        </div>
       `;
       list.appendChild(li);
     });
@@ -468,28 +566,121 @@ async function fetchCollection(){
   }
 }
 
-async function releasePokemon(instanceId) {
-  if (!confirm('Are you sure you want to release this Pokemon?')) return;
+function openReleaseModal(instanceId, name, sprite, capturedAt){
+  const modal = document.getElementById('releaseModal');
+  document.getElementById('releaseName').textContent = name;
+  document.getElementById('releaseSprite').src = sprite || '';
+  document.getElementById('releaseCaptured').textContent = capturedAt ? new Date(capturedAt).toLocaleString() : 'Unknown';
+  modal.dataset.instanceId = instanceId;
+  modal.classList.remove('hidden');
+}
+
+async function confirmRelease(){
+  const modal = document.getElementById('releaseModal');
+  const instanceId = modal.dataset.instanceId;
+  if(!instanceId) return;
   try {
     const res = await fetch(`${API_BASE}/pokemon/${instanceId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${getAuthToken()}` }
     });
-    if (res.ok) fetchCollection();
-    else alert('Failed to release Pokemon');
+    if (res.ok) {
+      modal.classList.add('hidden');
+      fetchCollection();
+    } else {
+      alert('Failed to release Pokemon');
+    }
   } catch (err) {
     alert('Network error');
   }
 }
 
+function closeReleaseModal(){
+  const modal = document.getElementById('releaseModal');
+  modal.classList.add('hidden');
+}
+
+
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, function(ch){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch];
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
   });
+}
+
+// Client-side search/filter
+const searchInput = document.getElementById('collectionSearch');
+let searchTimer = null;
+searchInput.addEventListener('input', ()=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{
+    const q = searchInput.value.trim().toLowerCase();
+    const list = document.getElementById('items');
+    list.innerHTML = '';
+    if(!q){
+      // re-render full cache
+      (window._collectionCache || []).forEach(p => renderListItem(p, list));
+      return;
+    }
+    const filtered = (window._collectionCache || []).filter(p => {
+      const name = (p.pokedexData?.name||'').toLowerCase();
+      const nick = (p.nickname||'').toLowerCase();
+      return name.includes(q) || nick.includes(q) || String(p.pokemonID||p.pokemonId||'').startsWith(q);
+    });
+    if(!filtered.length){ list.innerHTML = '<li class="muted">No results</li>'; return }
+    filtered.forEach(p => renderListItem(p, list));
+  }, 200);
+});
+
+function renderListItem(p, list){
+  const li = document.createElement('li');
+  const name = p.pokedexData?.name || `Pokemon #${p.pokemonID || p.pokemonId}`;
+  const sprite = p.pokedexData?.sprites?.front_default || p.pokedexData?.sprites?.front || (p.pokemonID? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.pokemonID}.png` : '');
+  const nickname = p.nickname ? `<span class="nickname">"${escapeHtml(p.nickname)}"</span>` : '';
+  const captured = p.capturedAt ? `<div class="captured">Captured: ${new Date(p.capturedAt).toLocaleString()}</div>` : '';
+
+  li.innerHTML = `
+    ${sprite ? `<img class="poke-sprite" src="${sprite}" alt="${name}">` : ''}
+    <div style="flex:1">
+      <div class="poke-meta"><strong>${escapeHtml(name)}</strong> ${nickname} ${p.isShiny ? '<span class="shiny">✨</span>' : ''}</div>
+      <div class="muted">Lv.${p.level || '?'} · ${p.types? p.types.join(', '): ''}</div>
+      ${captured}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+      <div class="id">#${p.pokemonID || p.pokemonId || ''}</div>
+      <button class="btn-small" onclick="openReleaseModal('${p._id}','${escapeHtml(name)}','${sprite.replace(/"/g,'')}', '${p.capturedAt || ''}')">Release</button>
+    </div>
+  `;
+  list.appendChild(li);
 }
 
 fetchCollection();
 
+// Theme toggle logic (dark mode)
+(function setupThemeToggle(){
+  const toggle = document.getElementById('themeToggle');
+  const emoji = toggle.querySelector('.emoji');
+  const STORAGE_KEY = 'pokestop_dark_mode_v1';
+
+  function apply(isDark){
+    document.documentElement.classList.toggle('dark-mode', !!isDark);
+    // When dark mode is on, show sun (☀️) so clicking it will go back to light
+    emoji.textContent = isDark ? '☀️' : '🌙';
+    toggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    localStorage.setItem(STORAGE_KEY, isDark ? '1' : '0');
+  }
+
+  // Initialize from saved preference (default light)
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const isDark = saved === '1';
+  apply(isDark);
+
+  toggle.addEventListener('click', ()=>{
+    const nowDark = !document.documentElement.classList.contains('dark-mode');
+    apply(nowDark);
+    // small feedback
+    toggle.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 240, easing: 'ease' });
+  });
+})();
 
 </script>
 </body>

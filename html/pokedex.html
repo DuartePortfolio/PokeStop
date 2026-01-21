@@ -15,12 +15,16 @@
     .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:70px}
     .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pokeball-black)}
     .logo-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(to bottom,var(--pokeball-red) 50%,var(--pokeball-white) 50%);border:3px solid var(--pokeball-black);position:relative;animation:bounce 2s ease-in-out infinite}
+    .logo-icon::before{content:'';position:absolute;top:50%;left:0;right:0;height:4px;background:var(--pokeball-black);transform:translateY(-50%)}
+    .logo-icon::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:var(--pokeball-white);border:3px solid var(--pokeball-black);border-radius:50%}
     @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
     .logo-text{font-size:1.5em;font-weight:800;color:var(--pokeball-red)}
     .nav-links{display:flex;gap:30px;list-style:none}
     .nav-links a{text-decoration:none;color:var(--pokeball-black);font-weight:600;padding:8px 16px;border-radius:20px;transition:all .3s}
     .nav-links a:hover,.nav-links a.active{background:var(--pokeball-red);color:white}
     .nav-auth{display:flex;gap:10px}
+    /* ensure welcome text respects theme colors */
+    .user-welcome span{ color: var(--pokeball-black) !important }
 
     .main-content{padding:40px 20px;min-height:calc(100vh - 70px);display:flex;align-items:flex-start;justify-content:center}
     .container{width:100%;max-width:1200px}
@@ -33,12 +37,25 @@
     .card-pkm .meta{display:flex;flex-direction:column}
     .meta .name{font-weight:700;text-transform:capitalize}
     .meta .types{font-size:0.85rem;color:#6b7280}
+
+    /* Dark mode for Pokédex list items */
+    .dark-mode .card { background: linear-gradient(135deg,#071022,#0b1220); border:1px solid rgba(255,255,255,0.04) }
+    .dark-mode .card-pkm { background: linear-gradient(135deg,#071026,#081422); border:1px solid rgba(255,255,255,0.03); color:var(--pokeball-black) }
+    .dark-mode .meta .types { color:#cbd5e6 }
+    .dark-mode .muted { color:#cbd5e6 }
+
+    /* Make theme toggle more visible */
+    .theme-toggle{ z-index:10000; box-shadow: 0 10px 30px rgba(2,6,23,0.12); border: 2px solid rgba(0,0,0,0.08) }
+    .dark-mode .theme-toggle{ border-color: rgba(255,255,255,0.1) }
     .sidebar{margin-left:20px;width:360px}
     .details{background:#fff;border-radius:12px;padding:16px;border:1px solid #f1f5f9}
     .details h2{margin-bottom:6px}
 
     @media (max-width: 900px){.main{display:block}.sidebar{width:auto;margin-left:0;margin-top:16px}}
     .hidden{display:none!important}
+
+    /* muted text used for empty states */
+    .muted{color:#6b7280;text-align:center;padding:12px;font-weight:600} 
 
     /* Ta-da star effect */
     .tada-star{position:absolute;top:8px;right:8px;font-size:28px;opacity:0;transform:scale(0.4) rotate(-20deg);pointer-events:none}
@@ -106,6 +123,9 @@
       </div>
     </div>
   </main>
+
+  <!-- Theme toggle (global) -->
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"><span class="emoji">🌙</span></button>
 
 <script>
 // Auth helpers
@@ -296,11 +316,57 @@ async function handleSearch(){
     }
 
     // Use server-side prefix search (efficient and cached)
-    const sr = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}&limit=200`);
-    if(!sr.ok) throw new Error('Search failed');
-    const results = await sr.json();
-    if(!results.results || !results.results.length) { listGrid.innerHTML='<div class="muted">No results</div>'; return }
-    renderList(results.results);
+    let sr;
+    try {
+      sr = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}&limit=200`);
+    } catch (e) {
+      sr = { ok: false };
+    }
+
+    if (sr && sr.ok) {
+      try {
+        const results = await sr.json();
+        const mapped = (results.results || []).map(r => ({
+          id: r.id,
+          name: r.name,
+          sprite: r.sprite || (r.id ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${r.id}.png` : '')
+        }));
+        if (mapped.length) { renderList(mapped); return }
+      } catch (e) { /* fall through to fallback */ }
+    }
+
+    // Fallback: quick client-side paged prefix scan (first 3 pages = 300 entries)
+    const pageSize = 100; // matches service page size limit
+    let matches = [];
+    for (let page = 0; page < 3 && matches.length < 200; page++) {
+      try {
+        const r = await fetch(`${API_BASE}/pokemon?limit=${pageSize}&offset=${page * pageSize}`);
+        if (!r.ok) break;
+        const data = await r.json();
+        const list = data.pokemon || data.results || [];
+        const filtered = list.filter(p => (p.name || '').startsWith(q.toLowerCase())).map((p, i) => ({
+          id: p.id || (page * pageSize + i + 1),
+          name: p.name,
+          sprite: p.sprite || (p.id ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png` : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${page * pageSize + i + 1}.png`)
+        }));
+        if (filtered.length) { matches = matches.concat(filtered); break }
+        if (!data.next) break;
+      } catch (e) { break }
+    }
+
+    if (matches.length) { renderList(matches.slice(0, 200)); return }
+
+    // Last-resort: try exact name lookup
+    try {
+      const exact2 = await fetch(`${API_BASE}/pokemon/name/${encodeURIComponent(q)}`);
+      if (exact2.ok) {
+        const data = await exact2.json();
+        renderList([{ id: data.id, name: data.name, sprite: data.sprites.front }]);
+        return;
+      }
+    } catch (e) { /* ignore */ }
+
+    listGrid.innerHTML = '<div class="muted">No results</div>';
   }catch(err){console.error(err); listGrid.innerHTML='<div class="muted">No results</div>' }
 }
 
@@ -326,6 +392,30 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;',
 // Load initial
 loadTypes(); fetchList();
 loadMoreBtn.addEventListener('click', fetchList);
+
+// Theme toggle logic (global)
+(function setupThemeToggle(){
+  const toggle = document.getElementById('themeToggle');
+  const emoji = toggle.querySelector('.emoji');
+  const STORAGE_KEY = 'pokestop_dark_mode_v1';
+
+  function apply(isDark){
+    document.documentElement.classList.toggle('dark-mode', !!isDark);
+    emoji.textContent = isDark ? '☀️' : '🌙';
+    toggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    localStorage.setItem(STORAGE_KEY, isDark ? '1' : '0');
+  }
+
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const isDark = saved === '1';
+  apply(isDark);
+
+  toggle.addEventListener('click', ()=>{
+    const nowDark = !document.documentElement.classList.contains('dark-mode');
+    apply(nowDark);
+    toggle.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 240, easing: 'ease' });
+  });
+})();
 
 </script>
 </body>
