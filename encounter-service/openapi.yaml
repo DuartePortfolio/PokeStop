@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Encounter Service API
+  description: API for managing Pokemon encounters, catching, and collection
+  version: 1.0.0
+servers:
+  - url: http://localhost:3002
+    description: Local development server
+security:
+  - bearerAuth: []
+paths:
+  /spawn:
+    post:
+      summary: Spawn new encounter
+      description: Create a new Pokemon encounter for the user
+      responses:
+        '200':
+          description: Encounter spawned
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+  /active:
+    get:
+      summary: Get active encounter
+      description: Retrieve the current active encounter for the user
+      responses:
+        '200':
+          description: Active encounter data
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+  /catch:
+    post:
+      summary: Attempt to catch Pokemon
+      description: Try to catch the Pokemon in the active encounter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                description: Catch attempt data
+      responses:
+        '200':
+          description: Catch attempt result
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+  /collect:
+    post:
+      summary: Add to collection
+      description: Add the caught Pokemon to user's collection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                description: Collection data
+      responses:
+        '200':
+          description: Pokemon added to collection
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+  /skip:
+    post:
+      summary: Skip encounter
+      description: Skip or flee from the current encounter
+      responses:
+        '200':
+          description: Encounter skipped
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+  /history:
+    get:
+      summary: Get encounter history
+      description: Retrieve the user's encounter history
+      responses:
+        '200':
+          description: Encounter history
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+  /stats:
+    get:
+      summary: Get encounter stats
+      description: Retrieve encounter statistics for the user
+      responses:
+        '200':
+          description: Encounter stats
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

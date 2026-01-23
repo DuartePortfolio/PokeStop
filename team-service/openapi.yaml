@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Team Service API
+  description: API for managing user Pokemon teams
+  version: 1.0.0
+servers:
+  - url: http://localhost:3004
+    description: Local development server
+security:
+  - bearerAuth: []
+paths:
+  /user/{userId}:
+    get:
+      summary: Get user teams
+      description: Retrieve all teams for a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of user's teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: Unauthorized
+        '403':
+          description: Access denied
+    post:
+      summary: Create team
+      description: Create a new team for the user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                description: Team data
+      responses:
+        '201':
+          description: Team created
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+        '403':
+          description: Access denied
+  /{teamId}:
+    get:
+      summary: Get team by ID
+      description: Retrieve a specific team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team data
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+        '404':
+          description: Team not found
+    put:
+      summary: Update team
+      description: Update a team's details
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                description: Update data
+      responses:
+        '200':
+          description: Team updated
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+        '404':
+          description: Team not found
+    delete:
+      summary: Delete team
+      description: Delete a team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team deleted
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+        '404':
+          description: Team not found
+  /{teamId}/activate:
+    post:
+      summary: Activate team
+      description: Set a team as the active team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team activated
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+        '404':
+          description: Team not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

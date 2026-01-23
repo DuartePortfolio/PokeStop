@@ -14,6 +14,21 @@
       "key": "token",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "teamId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "instanceId",
+      "value": "507f1f77bcf86cd799439011",
+      "type": "string"
     }
   ],
   "item": [
@@ -81,11 +96,53 @@
       ]
     },
     {
-      "name": "Users",
-      "description": "User management endpoints (requires authentication)",
+      "name": "User Service",
+      "description": "User management endpoints",
       "item": [
         {
-          "name": "Get All Users (Admin Only)",
+          "name": "Register User (Internal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ashketchum\",\n  \"password\": \"pikachu123\",\n  \"displayName\": \"Ash Ketchum\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Validate Credentials (Internal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ashketchum\",\n  \"password\": \"pikachu123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "validate"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
           "request": {
             "method": "GET",
             "header": [
@@ -95,31 +152,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/users/",
+              "raw": "{{baseUrl}}/api/users/me",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "users", ""]
+              "path": ["api", "users", "me"]
             }
           }
         },
         {
-          "name": "Get User By ID (Self Only)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/users/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1"]
-            }
-          }
-        },
-        {
-          "name": "Update User (Self Only)",
+          "name": "Update Current User",
           "request": {
             "method": "PUT",
             "header": [
@@ -134,17 +174,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"displayName\": \"Ash K.\",\n  \"bio\": \"Pokemon Master in training!\",\n  \"avatar\": \"https://example.com/new-avatar.png\"\n}"
+              "raw": "{\n  \"displayName\": \"Ash K.\",\n  \"bio\": \"Pokemon Master in training!\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/users/1",
+              "raw": "{{baseUrl}}/api/users/me",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1"]
+              "path": ["api", "users", "me"]
             }
           }
         },
         {
-          "name": "Delete User (Self Only)",
+          "name": "Delete Current User",
           "request": {
             "method": "DELETE",
             "header": [
@@ -154,157 +194,55 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/users/1",
+              "raw": "{{baseUrl}}/api/users/me",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Pokemon Collection (User's PC)",
-      "description": "Manage user's owned Pokemon - enriched with Pokedex data",
-      "item": [
-        {
-          "name": "Get User's Pokemon",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/collection/pokemon/user/1?enrich=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collection", "pokemon", "user", "1"],
-              "query": [
-                {
-                  "key": "enrich",
-                  "value": "true",
-                  "description": "Include Pokedex data (name, sprites, types)"
-                }
-              ]
+              "path": ["api", "users", "me"]
             }
           }
         },
         {
-          "name": "Get Pokemon Instance by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/collection/pokemon/:instanceId?enrich=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collection", "pokemon", ":instanceId"],
-              "query": [
-                {
-                  "key": "enrich",
-                  "value": "true"
-                }
-              ],
-              "variable": [
-                {
-                  "key": "instanceId",
-                  "value": "replace-with-pokemon-instance-id"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Add Pokemon to User",
+          "name": "GraphQL Endpoint",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"pokemonID\": 25,\n  \"level\": 15,\n  \"nickname\": \"Sparky\",\n  \"isShiny\": false,\n  \"gender\": \"male\",\n  \"ability\": \"Static\",\n  \"heldItem\": null,\n  \"hp\": 45,\n  \"attack\": 35,\n  \"defense\": 30,\n  \"spAttack\": 40,\n  \"spDefense\": 35,\n  \"speed\": 60\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/collection/pokemon/user/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collection", "pokemon", "user", "1"]
-            }
-          }
-        },
-        {
-          "name": "Update Pokemon Instance",
-          "request": {
-            "method": "PUT",
-            "header": [
+              },
               {
-                "key": "Content-Type",
-                "value": "application/json"
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nickname\": \"Thunder\",\n  \"heldItem\": \"Light Ball\",\n  \"level\": 20\n}"
+              "raw": "{\n  \"query\": \"query { users { id username displayName } }\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/collection/pokemon/:instanceId",
+              "raw": "{{baseUrl}}/api/users/graphql",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "collection", "pokemon", ":instanceId"],
-              "variable": [
-                {
-                  "key": "instanceId",
-                  "value": "replace-with-pokemon-instance-id"
-                }
-              ]
+              "path": ["api", "users", "graphql"]
             }
           }
         },
         {
-          "name": "Release Pokemon",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/collection/pokemon/:instanceId",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "collection", "pokemon", ":instanceId"],
-              "variable": [
-                {
-                  "key": "instanceId",
-                  "value": "replace-with-pokemon-instance-id"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Count User's Pokemon",
+          "name": "User Service Health",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/collection/pokemon/user/1/count",
+              "raw": "{{baseUrl}}/api/users/health",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "collection", "pokemon", "user", "1", "count"]
+              "path": ["api", "users", "health"]
             }
           }
         }
       ]
     },
     {
-      "name": "Health Checks",
-      "description": "Service health check endpoints",
+      "name": "Pokemon Collection",
+      "description": "Manage user's owned Pokemon",
       "item": [
-        {
-          "name": "API Gateway Health",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["health"]
-            }
-          }
-        },
         {
           "name": "Collection Service Health",
           "request": {
@@ -316,15 +254,9 @@
               "path": ["api", "collection", "health"]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Teams (Not Implemented)",
-      "description": "Team management endpoints - routes not yet implemented",
-      "item": [
+        },
         {
-          "name": "Get All Teams (TODO)",
+          "name": "Get User's Pokemon",
           "request": {
             "method": "GET",
             "header": [
@@ -334,9 +266,264 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/teams/",
+              "raw": "{{baseUrl}}/api/collection/pokemon/user/{{userId}}?enrich=true",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "teams", ""]
+              "path": ["api", "collection", "pokemon", "user", "{{userId}}"],
+              "query": [
+                {
+                  "key": "enrich",
+                  "value": "true",
+                  "description": "Include Pokedex data"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Pokemon Instance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/collection/pokemon/{{instanceId}}?enrich=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "collection", "pokemon", "{{instanceId}}"],
+              "query": [
+                {
+                  "key": "enrich",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Pokemon to Collection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pokemonID\": 25,\n  \"level\": 15,\n  \"nickname\": \"Sparky\",\n  \"experience\": 0,\n  \"isShiny\": false,\n  \"gender\": \"male\",\n  \"ability\": \"Static\",\n  \"heldItem\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/collection/pokemon/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "collection", "pokemon", "user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Pokemon Instance",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"Thunder\",\n  \"level\": 20\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/collection/pokemon/{{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "collection", "pokemon", "{{instanceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Release Pokemon",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/collection/pokemon/{{instanceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "collection", "pokemon", "{{instanceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Count User's Pokemon",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/collection/pokemon/user/{{userId}}/count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "collection", "pokemon", "user", "{{userId}}", "count"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Encounters",
+      "description": "Pokemon encounter management",
+      "item": [
+        {
+          "name": "Spawn Encounter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/encounters/spawn",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "encounters", "spawn"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Encounter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/encounters/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "encounters", "active"]
+            }
+          }
+        },
+        {
+          "name": "Attempt Catch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"catchRate\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/encounters/catch",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "encounters", "catch"]
+            }
+          }
+        },
+        {
+          "name": "Add Caught Pokemon to Collection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pokemonId\": 25,\n  \"level\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/encounters/collect",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "encounters", "collect"]
+            }
+          }
+        },
+        {
+          "name": "Skip Encounter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/encounters/skip",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "encounters", "skip"]
+            }
+          }
+        },
+        {
+          "name": "Get Encounter History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/encounters/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "encounters", "history"]
+            }
+          }
+        },
+        {
+          "name": "Get Encounter Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/encounters/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "encounters", "stats"]
             }
           }
         }
@@ -344,29 +531,17 @@
     },
     {
       "name": "Pokedex",
-      "description": "Pokedex endpoints - fetch Pokemon data from PokéAPI",
+      "description": "Pokemon data and information",
       "item": [
         {
-          "name": "List Pokemon (Paginated)",
+          "name": "List Pokemon",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/pokedex/pokemon?limit=20&offset=0",
+              "raw": "{{baseUrl}}/api/pokedex/pokemon",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "pokedex", "pokemon"],
-              "query": [
-                {
-                  "key": "limit",
-                  "value": "20",
-                  "description": "Number of Pokemon to return (max 100)"
-                },
-                {
-                  "key": "offset",
-                  "value": "0",
-                  "description": "Starting position"
-                }
-              ]
+              "path": ["api", "pokedex", "pokemon"]
             }
           }
         },
@@ -395,7 +570,7 @@
           }
         },
         {
-          "name": "Get Pokemon Species Info",
+          "name": "Get Pokemon Species",
           "request": {
             "method": "GET",
             "header": [],
@@ -407,7 +582,7 @@
           }
         },
         {
-          "name": "List All Types",
+          "name": "List Types",
           "request": {
             "method": "GET",
             "header": [],
@@ -436,39 +611,38 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/pokedex/random?maxId=151",
+              "raw": "{{baseUrl}}/api/pokedex/random",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "pokedex", "random"],
-              "query": [
-                {
-                  "key": "maxId",
-                  "value": "151",
-                  "description": "Max Pokedex ID (151 = Gen 1 only)"
-                }
-              ]
+              "path": ["api", "pokedex", "random"]
             }
           }
         },
         {
-          "name": "Health Check",
+          "name": "Search Pokemon",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/pokedex/health",
+              "raw": "{{baseUrl}}/api/pokedex/search?q=pika",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "pokedex", "health"]
+              "path": ["api", "pokedex", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "pika"
+                }
+              ]
             }
           }
         }
       ]
     },
     {
-      "name": "Encounters (Not Implemented)",
-      "description": "Encounter endpoints - routes not yet implemented",
+      "name": "Teams",
+      "description": "Pokemon team management",
       "item": [
         {
-          "name": "Get All Encounters (TODO)",
+          "name": "Get User Teams",
           "request": {
             "method": "GET",
             "header": [
@@ -478,13 +652,125 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/encounters/",
+              "raw": "{{baseUrl}}/api/teams/user/{{userId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "encounters", ""]
+              "path": ["api", "teams", "user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Team\",\n  \"pokemon\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teams", "user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Team by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teams", "{{teamId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Team",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Team\",\n  \"pokemon\": [1, 2, 3, 4]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teams", "{{teamId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Team",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teams", "{{teamId}}"]
+            }
+          }
+        },
+        {
+          "name": "Activate Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/teams/{{teamId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teams", "{{teamId}}", "activate"]
             }
           }
         }
       ]
-    }
-  ]
-}
+    },
+    {
+      "name": "Health Checks",
+      "description": "Service health check endpoints",
+      "item": [
+        {
+          "name": "API Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]

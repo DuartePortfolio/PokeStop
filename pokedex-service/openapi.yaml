@@ -1,0 +1,143 @@
+openapi: 3.0.3
+info:
+  title: Pokedex Service API
+  description: API for accessing Pokemon data and information
+  version: 1.0.0
+servers:
+  - url: http://localhost:3003
+    description: Local development server
+paths:
+  /pokemon:
+    get:
+      summary: List Pokemon
+      description: Get a list of all Pokemon
+      responses:
+        '200':
+          description: List of Pokemon
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /pokemon/name/{name}:
+    get:
+      summary: Get Pokemon by name
+      description: Retrieve Pokemon data by name
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pokemon data
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Pokemon not found
+  /pokemon/{id}:
+    get:
+      summary: Get Pokemon by ID
+      description: Retrieve Pokemon data by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pokemon data
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Pokemon not found
+  /pokemon/{id}/species:
+    get:
+      summary: Get Pokemon species
+      description: Retrieve species information for a Pokemon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Species data
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Species not found
+  /types:
+    get:
+      summary: List types
+      description: Get a list of all Pokemon types
+      responses:
+        '200':
+          description: List of types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /types/{type}:
+    get:
+      summary: Get Pokemon by type
+      description: Get Pokemon that have a specific type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of Pokemon of the type
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '404':
+          description: Type not found
+  /random:
+    get:
+      summary: Get random Pokemon
+      description: Retrieve a random Pokemon
+      responses:
+        '200':
+          description: Random Pokemon data
+          content:
+            application/json:
+              schema:
+                type: object
+  /search:
+    get:
+      summary: Search Pokemon
+      description: Search for Pokemon by query
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+            description: Search query
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object

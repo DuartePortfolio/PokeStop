@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: User Service GraphQL API
+  description: GraphQL API for user management
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001
+    description: Local development server
+security:
+  - bearerAuth: []
+paths:
+  /graphql:
+    post:
+      summary: GraphQL endpoint
+      description: Execute GraphQL queries and mutations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: GraphQL query string
+                variables:
+                  type: object
+                  description: Query variables
+                operationName:
+                  type: string
+                  description: Operation name
+      responses:
+        '200':
+          description: GraphQL response
+          content:
+            application/json:
+              schema:
+                type: object
+    get:
+      summary: GraphQL Playground
+      description: Access GraphiQL interface for testing GraphQL queries
+      responses:
+        '200':
+          description: GraphiQL interface
+          content:
+            text/html:
+              schema:
+                type: string
+  /health:
+    get:
+      summary: Health check
+      description: Check service and database status
+      security: []
+      responses:
+        '200':
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  db:
+                    type: boolean
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

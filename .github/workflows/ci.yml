@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  authentication-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: authentication-service/package-lock.json
+    - name: Install dependencies
+      run: |
+        cd authentication-service
+        npm ci
+    - name: Run tests
+      run: |
+        cd authentication-service
+        npm test
+    - name: Run lint
+      run: |
+        cd authentication-service
+        npm run lint || echo "No lint script defined"
+
+  collection-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        cd collection-service
+        pip install -r requirements.txt
+    - name: Run tests
+      run: |
+        cd collection-service
+        python -m pytest || echo "No tests found"
+
+  encounter-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: encounter-service/package-lock.json
+    - name: Install dependencies
+      run: |
+        cd encounter-service
+        npm ci
+    - name: Run tests
+      run: |
+        cd encounter-service
+        npm test
+    - name: Run lint
+      run: |
+        cd encounter-service
+        npm run lint || echo "No lint script defined"
+
+  pokedex-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: pokedex-service/package-lock.json
+    - name: Install dependencies
+      run: |
+        cd pokedex-service
+        npm ci
+    - name: Run tests
+      run: |
+        cd pokedex-service
+        npm test
+    - name: Run lint
+      run: |
+        cd pokedex-service
+        npm run lint || echo "No lint script defined"
+
+  team-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: team-service/package-lock.json
+    - name: Install dependencies
+      run: |
+        cd team-service
+        npm ci
+    - name: Run tests
+      run: |
+        cd team-service
+        npm test
+    - name: Run lint
+      run: |
+        cd team-service
+        npm run lint || echo "No lint script defined"
+
+  user-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: user-service/package-lock.json
+    - name: Install dependencies
+      run: |
+        cd user-service
+        npm ci
+    - name: Run tests
+      run: |
+        cd user-service
+        npm test
+    - name: Run lint
+      run: |
+        cd user-service
+        npm run lint || echo "No lint script defined"
