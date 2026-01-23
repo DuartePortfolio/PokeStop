@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const POKEAPI_BASE = 'https://pokeapi.co/api/v2';
 const cache = new Map(); // Simple in-memory cache
@@ -219,7 +219,7 @@ function clearCache() {
     cache.clear();
 }
 
-module.exports = {
+export {
     getPokemonList,
     getPokemonById,
     getPokemonByName,

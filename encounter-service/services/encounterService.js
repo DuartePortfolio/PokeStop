@@ -1,6 +1,6 @@
-const axios = require('axios');
-const Encounter = require('../models/Encounter');
-const MinigameAttempt = require('../models/MinigameAttempt');
+import axios from 'axios';
+import Encounter from '../models/Encounter.js';
+import MinigameAttempt from '../models/MinigameAttempt.js';
 
 const POKEDEX_SERVICE_URL = process.env.POKEDEX_SERVICE_URL || 'http://pokedex-service:3003';
 const COLLECTION_SERVICE_URL = process.env.COLLECTION_SERVICE_URL || 'http://collection-service:3004';
@@ -275,7 +275,7 @@ async function getEncounterStats(userId) {
   };
 }
 
-module.exports = {
+export {
   spawnEncounter,
   getActiveEncounter,
   attemptCatch,

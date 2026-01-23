@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PokéStop — Teams</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--pokeball-red:#E3350D;--pokeball-white:#fff;--pokeball-black:#2D2D2D;--shadow:0 6px 24px rgba(2,6,23,0.06)}
+    body{font-family:'Nunito',sans-serif;background:var(--pokeball-white);color:var(--pokeball-black);min-height:100vh}
+    nav{position:sticky;top:0;background:var(--pokeball-white);box-shadow:var(--shadow);z-index:100;padding:0 20px}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:70px}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pokeball-black)}
+    .nav-username{color:var(--pokeball-black);font-weight:700;text-decoration:none;display:inline-block;transition:transform 160ms ease,color 160ms ease;cursor:pointer}
+    .nav-username:hover,.nav-username:focus{color:var(--pokeball-red);transform:scale(1.04);outline:none}
+    .nav-username:focus{box-shadow:0 0 0 3px rgba(227,53,13,0.12);border-radius:6px}
+    .logo-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(to bottom,var(--pokeball-red) 50%,var(--pokeball-white) 50%);border:3px solid var(--pokeball-black);position:relative;animation:bounce 2s ease-in-out infinite}
+    .logo-icon::before{content:'';position:absolute;top:50%;left:0;right:0;height:4px;background:var(--pokeball-black);transform:translateY(-50%)}
+    .logo-icon::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:var(--pokeball-white);border:3px solid var(--pokeball-black);border-radius:50%}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+    .container{max-width:1200px;margin:30px auto;padding:20px}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+
+    .card{background:linear-gradient(135deg,#ffffff,#f8f9fb);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+    .title{font-size:1.2rem;font-weight:800;margin-bottom:8px}
+
+    .collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+    .poke-card{background:#fff;border-radius:10px;padding:8px;display:flex;gap:8px;align-items:center;border:1px solid #eef2f6;cursor:pointer}
+    .poke-card.selected{background:linear-gradient(135deg,#fff0f0,#ffecec);border:1px solid #ef4444;box-shadow:0 6px 20px rgba(239,68,68,0.06)}
+    .poke-card img{width:48px;height:48px}
+    .poke-meta{display:flex;flex-direction:column}
+    .btn{padding:8px 12px;border-radius:10px;border:none;background:var(--pokeball-red);color:white;cursor:pointer}
+
+    .teams-list{display:flex;flex-direction:column;gap:10px}
+    .team-card{background:#fff;border-radius:10px;padding:12px;border:1px solid #eef2f6;display:flex;justify-content:space-between;align-items:center}
+    .team-card.active{background:linear-gradient(135deg,#fff0f0,#ffecec);border-color:#ef4444;box-shadow:0 6px 20px rgba(239,68,68,0.06)}
+    .team-members{display:flex;gap:8px;align-items:center}
+    .member{width:40px;height:40px;border-radius:8px;overflow:hidden}
+
+    .muted{color:#6b7280}
+
+    /* theme toggle */
+    .theme-toggle{position:fixed;right:20px;bottom:20px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(2,6,23,0.08);border:2px solid rgba(0,0,0,0.06);cursor:pointer;z-index:999}
+
+    /* dark mode overrides */
+    .dark-mode .card{background:linear-gradient(135deg,#071022,#0b1220);border:1px solid rgba(255,255,255,0.04)}
+    .dark-mode body{background:linear-gradient(135deg,#071022,#041025);color:#e6eef8}
+    .dark-mode .muted{color:#cbd5e6}
+    .dark-mode .theme-toggle{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.08)}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="logo"><div class="logo-icon"></div><span class="logo-text">PokéStop</span></a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="encounter.html">Catch Pokémon</a></li>
+        <li><a href="collections.html">Collection</a></li>
+        <li><a href="pokedex.html">Pokédex</a></li>
+        <li><a href="teams.html" class="active">Teams</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div class="title">Create New Team</div>
+          <label style="display:block;margin-bottom:8px">Team name <input id="teamName" placeholder="My team" style="width:100%;padding:8px;margin-top:6px;border-radius:8px;border:1px solid #e6eef7"></label>
+          <div style="margin-top:12px"><strong>Pick up to 6 Pokémon from your collection</strong></div>
+          <div id="collectionGrid" class="collection-grid"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button id="saveTeamBtn" class="btn">Save Team</button>
+            <div class="muted" id="selectedCount">0 selected</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="title">Your Teams</div>
+          <div id="teamsList" class="teams-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title">Tips</div>
+        <p class="muted">Create strategic teams using Pokémon you own. You can only include Pokémon that exist in your Collection.</p>
+      </div>
+    </div>
+  </div>
+
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="emoji">🌙</span></button>
+
+<script src="modal.js"></script>
+<script>
+const API_COLL = '/api/collection';
+const API_TEAMS = '/api/teams';
+
+function getAuthToken(){return localStorage.getItem('authToken');}
+function getUserFromToken(){const token=getAuthToken(); if(!token) return null; try{return JSON.parse(atob(token.split('.')[1]));}catch(e){return null}}
+const user = getUserFromToken(); if(!user){ notify('Please log in', { type: 'info' }); window.location.href='login.html'; }
+const USER_ID = user.id;
+
+let collectionCache = [];
+let selected = new Set();
+
+function getSprite(p){
+  if(!p) return '';
+  const s = p.pokedexData?.sprites || {};
+  // Prefer shiny sprite when Pokemon instance is shiny
+  if (p.isShiny) {
+    return s.frontShiny || s.front_shiny || s.front_default || s.front || (p.pokemonID ? 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.pokemonID + '.png' : '');
+  }
+  return s.front_default || s.front || (p.pokemonID ? 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + p.pokemonID + '.png' : '');
+} 
+
+async function loadCollection(){
+  const res = await fetch(`${API_COLL}/pokemon/user/${USER_ID}`, { headers: { 'Authorization': `Bearer ${getAuthToken()}` }});
+  if(!res.ok) { document.getElementById('collectionGrid').innerHTML = '<div class="muted">Failed to load collection</div>'; return }
+  const data = await res.json(); collectionCache = data.pokemon || [];
+  renderCollection();
+}
+
+function renderCollection(){
+  const grid = document.getElementById('collectionGrid'); grid.innerHTML='';
+  collectionCache.forEach(p=>{
+    const el = document.createElement('div');
+    el.className='poke-card';
+    el.dataset.id = p._id;
+    el.setAttribute('tabindex','0');
+    if (selected.has(p._id)) el.classList.add('selected');
+    const sprite = getSprite(p);
+    const displayName = p.nickname || p.pokedexData?.name || 'Unknown';
+    el.innerHTML = `${sprite?`<img src="${sprite}" alt="${displayName}">`:''}<div class="poke-meta"><strong>${displayName}</strong><span class="muted">Lv.${p.level||'?'}</span></div>`;
+    el.addEventListener('click', ()=>toggleSelect(p._id, el));
+    el.addEventListener('keydown', (e)=>{ if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggleSelect(p._id, el); } });
+    grid.appendChild(el);
+  });
+}
+
+function toggleSelect(id, el){
+  if(!id) return;
+  if(selected.has(id)){
+    selected.delete(id);
+    el.classList.remove('selected');
+  } else {
+    if(selected.size >= 6){ notify('Teams can have up to 6 members', { type: 'info' }); return; }
+    selected.add(id);
+    el.classList.add('selected');
+  }
+  document.getElementById('selectedCount').textContent = `${selected.size} selected`;
+}
+
+async function saveTeam(){
+  const name = document.getElementById('teamName').value.trim();
+  const members = Array.from(selected);
+  if(!name){ notify('Please provide a team name', { type: 'info' }); return; }
+  if(members.length===0){ notify('Please select at least one Pokemon', { type: 'info' }); return; }
+  try{
+    const res = await fetch(`${API_TEAMS}/user/${USER_ID}`, { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${getAuthToken()}` }, body: JSON.stringify({ name, members }) });
+    if(!res.ok){ const j = await res.json(); throw new Error(j.error||'Failed'); }
+    notify('Team saved', { type: 'success' }); document.getElementById('teamName').value=''; selected.clear(); document.getElementById('selectedCount').textContent='0 selected'; loadTeams();
+  }catch(err){ await showAlert(err.message) }
+}
+
+async function loadTeams(){
+  const res = await fetch(`${API_TEAMS}/user/${USER_ID}`, { headers:{ 'Authorization': `Bearer ${getAuthToken()}` }});
+  if(!res.ok){ document.getElementById('teamsList').innerHTML='<div class="muted">Failed to load teams</div>'; return }
+  const data = await res.json(); const list = document.getElementById('teamsList'); list.innerHTML='';
+  (data.teams||[]).forEach(t=>{
+    const el = document.createElement('div'); el.className='team-card'; el.dataset.id=t.id;
+    if (t.is_active) el.classList.add('active');
+    const memberEls = (t.members||[]).slice(0,6).map(id=>{
+      const p = collectionCache.find(x=>x._id===id);
+      const sprite = getSprite(p);
+      const title = p?.nickname || p?.pokedexData?.name || id;
+      return `<div title="${title}" class="member">${sprite?`<img src="${sprite}" style="width:100%;height:100%">`:''}</div>`
+    }).join('');
+    const activateBtn = t.is_active ? `<button class="btn" disabled style="background:#ef4444">Active</button>` : `<button class="btn" onclick="activate(${t.id})">Activate</button>`;
+    el.innerHTML = `<div><strong>${t.name}</strong><div class="muted">${t.members.length || 0} members</div></div><div style="display:flex;gap:8px;align-items:center"><div class="team-members">${memberEls}</div>${activateBtn}<button class="btn" style="background:#ef4444;margin-left:6px" onclick="removeTeam(${t.id})">Delete</button></div>`;
+    list.appendChild(el);
+  });
+}
+
+async function activate(teamId){
+  const res = await fetch(`${API_TEAMS}/${teamId}/activate`, { method:'POST', headers:{ 'Authorization': `Bearer ${getAuthToken()}` }});
+  if(!res.ok){ await showAlert('Failed to activate'); return; }
+  notify('Team activated', { type: 'success' }); loadTeams();
+}
+async function removeTeam(teamId){
+  const ok = await showConfirm('Delete this team?');
+  if(!ok) return;
+  const res = await fetch(`${API_TEAMS}/${teamId}`, { method:'DELETE', headers:{ 'Authorization': `Bearer ${getAuthToken()}` }});
+  if(!res.ok){ await showAlert('Failed to delete'); return; }
+  notify('Team deleted', { type: 'success' }); loadTeams(); }
+
+document.getElementById('saveTeamBtn').addEventListener('click', saveTeam);
+
+// Theme toggle logic (global)
+(function setupThemeToggle(){
+  const toggle = document.getElementById('themeToggle');
+  const emoji = toggle.querySelector('.emoji');
+  const STORAGE_KEY = 'pokestop_dark_mode_v1';
+  function apply(isDark){ document.documentElement.classList.toggle('dark-mode', !!isDark); emoji.textContent = isDark ? '☀️' : '🌙'; localStorage.setItem(STORAGE_KEY, isDark ? '1' : '0'); }
+  const saved = localStorage.getItem(STORAGE_KEY); apply(saved === '1');
+  toggle.addEventListener('click', ()=>{ const nowDark = !document.documentElement.classList.contains('dark-mode'); apply(nowDark); toggle.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 240, easing: 'ease' }); });
+})();
+
+// Init
+loadCollection().then(loadTeams);
+</script>
+</body>
+</html>

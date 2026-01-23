@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../services/sequelize');
+import { DataTypes } from 'sequelize';
+import sequelize from '../services/sequelize.js';
 
 const Encounter = sequelize.define('Encounter', {
   userId: { type: DataTypes.INTEGER, allowNull: false },
@@ -22,4 +22,4 @@ const Encounter = sequelize.define('Encounter', {
   timestamps: false
 });
 
-module.exports = Encounter;
+export default Encounter;

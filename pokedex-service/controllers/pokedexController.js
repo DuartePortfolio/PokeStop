@@ -1,12 +1,11 @@
-import logger from "../utils/logger.js"
-
-const pokedexService = require('../services/pokedexService');
+import logger from "../utils/logger.js";
+import * as pokedexService from '../services/pokedexService.js';
 
 /**
  * GET /pokedex/pokemon
  * List Pokemon with pagination
  */
-exports.listPokemon = async (req, res) => {
+export async function listPokemon(req, res) {
     try {
         logger.info('Fetching Pokemon list', { limit: req.query.limit, offset: req.query.offset });
         const limit = Math.min(parseInt(req.query.limit) || 20, 100); // Max 100
@@ -24,7 +23,7 @@ exports.listPokemon = async (req, res) => {
  * GET /pokedex/pokemon/:id
  * Get Pokemon by Pokedex ID
  */
-exports.getPokemonById = async (req, res) => {
+export async function getPokemonById(req, res) {
     try {
         const { id } = req.params;
         logger.info('Fetching Pokemon by ID', { id });
@@ -44,7 +43,7 @@ exports.getPokemonById = async (req, res) => {
  * GET /pokedex/pokemon/name/:name
  * Get Pokemon by name
  */
-exports.getPokemonByName = async (req, res) => {
+export async function getPokemonByName(req, res) {
     try {
         const { name } = req.params;
         logger.info('Fetching Pokemon by name', { name });
@@ -64,7 +63,7 @@ exports.getPokemonByName = async (req, res) => {
  * GET /pokedex/pokemon/:id/species
  * Get Pokemon species info (flavor text, capture rate, etc.)
  */
-exports.getPokemonSpecies = async (req, res) => {
+export async function getPokemonSpecies(req, res) {
     try {
         const { id } = req.params;
         logger.info('Fetching Pokemon species', { id });
@@ -78,13 +77,13 @@ exports.getPokemonSpecies = async (req, res) => {
         logger.error('Error fetching Pokemon species:', err.message);
         res.status(500).json({ error: 'Failed to fetch Pokemon species' });
     }
-};
+}
 
 /**
  * GET /pokedex/types
  * List all Pokemon types
  */
-exports.listTypes = async (req, res) => {
+export async function listTypes(req, res) {
     try {
         logger.info('Fetching all types');
         const types = await pokedexService.getTypes();
@@ -93,13 +92,13 @@ exports.listTypes = async (req, res) => {
         logger.error('Error fetching types:', err.message);
         res.status(500).json({ error: 'Failed to fetch types' });
     }
-};
+}
 
 /**
  * GET /pokedex/types/:type
  * Get all Pokemon of a specific type
  */
-exports.getPokemonByType = async (req, res) => {
+export async function getPokemonByType(req, res) {
     try {
         const { type } = req.params;
         logger.info('Fetching Pokemon by type', { type });
@@ -117,13 +116,13 @@ exports.getPokemonByType = async (req, res) => {
         logger.error('Error fetching Pokemon by type:', err.message);
         res.status(500).json({ error: 'Failed to fetch Pokemon by type' });
     }
-};
+}
 
 /**
  * GET /pokedex/random
  * Get a random Pokemon (useful for encounters)
  */
-exports.getRandomPokemon = async (req, res) => {
+export async function getRandomPokemon(req, res) {
     try {
         const maxId = Math.min(parseInt(req.query.maxId) || 151, 1010);
         logger.info('Fetching random Pokemon', { maxId });
@@ -133,13 +132,13 @@ exports.getRandomPokemon = async (req, res) => {
         logger.error('Error fetching random Pokemon:', err.message);
         res.status(500).json({ error: 'Failed to fetch random Pokemon' });
     }
-};
+}
 
 /**
  * GET /pokedex/search?q=
  * Search Pokemon by name prefix (case-insensitive)
  */
-exports.searchPokemon = async (req, res) => {
+export async function searchPokemon(req, res) {
     try {
         const q = String(req.query.q || '').trim();
         logger.info('Searching Pokemon', { q, limit: req.query.limit });
@@ -151,4 +150,4 @@ exports.searchPokemon = async (req, res) => {
         logger.error('Error searching Pokemon:', err.message);
         res.status(500).json({ error: 'Failed to search Pokemon' });
     }
-};
+}

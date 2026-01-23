@@ -1,5 +1,5 @@
-const bcrypt = require('bcrypt');
-const User = require('../models/User');
+import bcrypt from 'bcrypt';
+import User from '../models/User.js';
 
 async function createUser({ username, password, displayName, avatar, bio, badges, stats }) {
   if (!username || !password || !displayName) {
@@ -50,4 +50,8 @@ async function getUserById(id) {
   return await User.findByPk(id);
 }
 
-module.exports = { createUser, validateUser, deleteUser, updateUser, getAllUsers, getUserById };
+async function getUserByUsername(username) {
+  return await User.findOne({ where: { username } });
+}
+
+export { createUser, validateUser, deleteUser, updateUser, getAllUsers, getUserById, getUserByUsername };

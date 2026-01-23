@@ -1,9 +1,8 @@
-import logger from "../utils/logger.js" 
-
-const encounterService = require('../services/encounterService');
+import logger from "../utils/logger.js";
+import * as encounterService from '../services/encounterService.js';
 
 // Spawn a new encounter
-exports.spawn = async (req, res) => {
+export async function spawn(req, res) {
   try {
     const userId = req.user.id;
     logger.info(`Spawning encounter for user ${userId}`);
@@ -21,7 +20,7 @@ exports.spawn = async (req, res) => {
 };
 
 // Get active encounter
-exports.getActive = async (req, res) => {
+export async function getActive(req, res) {
   try {
     const userId = req.user.id;
     logger.info(`Fetching active encounter for user ${userId}`);
@@ -41,7 +40,7 @@ exports.getActive = async (req, res) => {
 };
 
 // Attempt to catch
-exports.attemptCatch = async (req, res) => {
+export async function attemptCatch(req, res) {
   try {
     const userId = req.user.id;
     const { encounterId, score } = req.body;
@@ -66,7 +65,7 @@ exports.attemptCatch = async (req, res) => {
 };
 
 // Add caught Pokemon to collection
-exports.addToCollection = async (req, res) => {
+export async function addToCollection(req, res) {
   try {
     const userId = req.user.id;
     const { encounterId, nickname } = req.body;
@@ -92,7 +91,7 @@ exports.addToCollection = async (req, res) => {
 };
 
 // Skip/flee encounter
-exports.skip = async (req, res) => {
+export async function skip(req, res) {
   try {
     const userId = req.user.id;
     const { encounterId } = req.body;
@@ -117,7 +116,7 @@ exports.skip = async (req, res) => {
 };
 
 // Get encounter history
-exports.getHistory = async (req, res) => {
+export async function getHistory(req, res) {
   try {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit) || 20;
@@ -132,7 +131,7 @@ exports.getHistory = async (req, res) => {
 };
 
 // Get encounter stats
-exports.getStats = async (req, res) => {
+export async function getStats(req, res) {
   try {
     const userId = req.user.id;
     logger.info(`Fetching encounter stats for user ${userId}`);

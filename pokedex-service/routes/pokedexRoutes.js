@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
+import * as pokedexController from "../controllers/pokedexController.js";
 const router = express.Router();
-const pokedexController = require("../controllers/pokedexController");
 
 // Pokemon endpoints
 // NOTE: More specific routes must come before generic ones
@@ -17,4 +17,4 @@ router.get("/types/:type", pokedexController.getPokemonByType);
 router.get("/random", pokedexController.getRandomPokemon);
 router.get("/search", pokedexController.searchPokemon);
 
-module.exports = router;
+export default router;

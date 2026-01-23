@@ -1,4 +1,4 @@
-const userService = require('../services/userService');
+import * as userService from '../services/userService.js';
 
 // Helper function to format user data for response
 function formatUser(user) {
@@ -57,7 +57,8 @@ const resolvers = {
     // No authentication required for this internal operation
     try {
       // Verify the token and extract user
-      const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'pokestop-secret-change-in-production');
+      const jwt = await import('jsonwebtoken');
+      const decoded = jwt.default.verify(token, process.env.JWT_SECRET || 'pokestop-secret-change-in-production');
       const user = await userService.getUserById(decoded.id);
       return user ? true : false;
     } catch (err) {
@@ -142,4 +143,4 @@ const resolvers = {
   }
 };
 
-module.exports = resolvers;
+export default resolvers;

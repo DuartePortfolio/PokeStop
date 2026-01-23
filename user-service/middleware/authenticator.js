@@ -11,7 +11,7 @@
  * ./graphql/resolvers.js
  */
 
-const authService = require('../services/authService');
+import * as authService from '../services/authService.js';
 
 /**
  * @deprecated Use GraphQL authentication middleware instead
@@ -55,4 +55,4 @@ function authorizeSelf(req, res, next) {
 	next();
 }
 
-module.exports = { authenticateToken, authorizeRole, authorizeSelf };
+export { authenticateToken, authorizeRole, authorizeSelf };
