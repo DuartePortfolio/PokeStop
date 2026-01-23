@@ -1,5 +1,21 @@
+/**
+ * DEPRECATED: This file is maintained for reference only.
+ * 
+ * The User Service has been converted to GraphQL.
+ * Authentication middleware has been replaced with GraphQL context handling.
+ * 
+ * The equivalent GraphQL authentication middleware is located in:
+ * ./graphql/authMiddleware.js
+ * 
+ * Authorization is now handled directly in the GraphQL resolvers:
+ * ./graphql/resolvers.js
+ */
+
 const authService = require('../services/authService');
 
+/**
+ * @deprecated Use GraphQL authentication middleware instead
+ */
 function authenticateToken(req, res, next) {
 	const authHeader = req.headers.authorization;
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,6 +30,9 @@ function authenticateToken(req, res, next) {
 	next();
 }
 
+/**
+ * @deprecated Use authorization logic in GraphQL resolvers instead
+ */
 function authorizeRole(requiredRole) {
 	return (req, res, next) => {
 		if (!req.user) return res.status(401).json({ error: 'Not authenticated.' });
@@ -24,6 +43,9 @@ function authorizeRole(requiredRole) {
 	};
 }
 
+/**
+ * @deprecated Use authorization logic in GraphQL resolvers instead
+ */
 function authorizeSelf(req, res, next) {
 	if (!req.user) return res.status(401).json({ error: 'Not authenticated.' });
 	const paramId = Number(req.params.id);

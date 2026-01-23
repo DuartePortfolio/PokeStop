@@ -3,10 +3,11 @@ const router = express.Router();
 const pokedexController = require("../controllers/pokedexController");
 
 // Pokemon endpoints
+// NOTE: More specific routes must come before generic ones
 router.get("/pokemon", pokedexController.listPokemon);
 router.get("/pokemon/name/:name", pokedexController.getPokemonByName);
-router.get("/pokemon/:id", pokedexController.getPokemonById);
 router.get("/pokemon/:id/species", pokedexController.getPokemonSpecies);
+router.get("/pokemon/:id", pokedexController.getPokemonById);
 
 // Type endpoints
 router.get("/types", pokedexController.listTypes);

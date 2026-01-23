@@ -47,6 +47,8 @@ services:
       context: ./user-service
       dockerfile: Dockerfile
     container_name: pokestop-user-service
+    ports:
+      - "3001:3001"
     environment:
       - PORT=3001
       - NODE_ENV=production
@@ -107,7 +109,7 @@ services:
     container_name: pokestop-collection-service
     environment:
       - PORT=3004
-      - MONGO_URI=mongodb://mongodb:27017/pokestop_collection_db
+      - MONGO_URI=mongodb://root:enter@mongodb:27017/pokestop_collection_db?authSource=admin
       - DB_NAME=pokestop_collection_db
       - POKEDEX_SERVICE_URL=http://pokedex-service:3003
       - JWT_SECRET=${JWT_SECRET:-pokestop-secret-change-in-production}
@@ -150,25 +152,41 @@ services:
       - "3307:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-enter}
+      - MYSQL_ROOT_HOST=%
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./database-schemas:/docker-entrypoint-initdb.d:ro
+      - ./database-schemas/init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql:ro
     networks:
       - pokestop-network
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # MongoDB (for Collection Service)
   mongodb:
     image: mongo:7.0
     container_name: pokestop-mongodb
+    ports:
+      - "27017:27017"
     environment:
       - MONGO_INITDB_DATABASE=pokestop_collection_db
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-enter}
     volumes:
       - mongodb-data:/data/db
+      - ./database-schemas/init-mongodb.js:/docker-entrypoint-initdb.d/init-mongodb.js:ro
     networks:
       - pokestop-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   pokestop-network:

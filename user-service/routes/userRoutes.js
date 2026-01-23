@@ -1,18 +1,25 @@
+/**
+ * DEPRECATED: This file is maintained for reference only.
+ * 
+ * The User Service has been converted to GraphQL.
+ * All REST endpoints have been replaced with GraphQL operations.
+ * 
+ * Please use the GraphQL endpoint at POST /graphql instead.
+ * See GRAPHQL_API.md for complete API documentation.
+ * 
+ * REST to GraphQL Mapping:
+ * - POST /users/register      → Mutation: registerUser
+ * - POST /users/validate      → Query: validateUser
+ * - GET /users/               → Query: getAllUsers
+ * - GET /users/:id            → Query: getUserById
+ * - PUT /users/:id            → Mutation: updateUser
+ * - DELETE /users/:id         → Mutation: deleteUser
+ */
+
 const express = require("express");
 const router = express.Router();
-const userController = require("../controllers/userController");
-const authenticator = require("../middleware/authenticator");
 
-// Internal routes (called by auth-service)
-router.post("/register", userController.register);
-router.post("/validate", userController.validate);
-
-// Protected routes
-router.get("/", authenticator.authenticateToken, authenticator.authorizeRole("admin"), userController.getAllUsers);
-
-// only allow the authenticated user to access their own resource
-router.get("/:id", authenticator.authenticateToken, authenticator.authorizeSelf, userController.getUserById);
-router.delete("/:id", authenticator.authenticateToken, authenticator.authorizeSelf, userController.deleteUser);
-router.put("/:id", authenticator.authenticateToken, authenticator.authorizeSelf, userController.updateUser);
+// All endpoints are now handled by GraphQL at /graphql
+// This file is kept for documentation purposes only.
 
 module.exports = router;
