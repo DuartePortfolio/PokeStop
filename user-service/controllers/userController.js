@@ -1,8 +1,25 @@
+/**
+ * DEPRECATED: This file is maintained for reference only.
+ * 
+ * The User Service has been converted to GraphQL.
+ * All controller functions have been replaced with GraphQL resolvers.
+ * 
+ * Please use the GraphQL endpoint at POST /graphql instead.
+ * See GRAPHQL_API.md for complete API documentation.
+ * 
+ * The equivalent GraphQL resolvers are located in:
+ * ./graphql/resolvers.js
+ */
+
+// Legacy controller functions kept for reference
+// These are no longer used but show the mapping to GraphQL
 import logger from "../utils/logger.js";
 
 const userService = require("../services/userService");
 
-// Internal endpoint for auth-service to create users
+/**
+ * @deprecated Use GraphQL Mutation: registerUser instead
+ */
 exports.register = async (req, res) => {
   logger.info('Registering user:', req.body);
   const { username, password, displayName, avatar, bio, badges, stats } = req.body;
@@ -20,7 +37,9 @@ exports.register = async (req, res) => {
   }
 };
 
-// Internal endpoint for auth-service to validate credentials
+/**
+ * @deprecated Use GraphQL Query: validateUser instead
+ */
 exports.validate = async (req, res) => {
   logger.info('Validating user credentials:', req.body);
   const { username, password } = req.body;
@@ -37,6 +56,9 @@ exports.validate = async (req, res) => {
   res.json({ user });
 };
 
+/**
+ * @deprecated Use GraphQL Query: getAllUsers instead
+ */
 exports.getAllUsers = async (req, res) => {
   logger.info('Fetching all users');
   const users = await userService.getAllUsers();
@@ -54,6 +76,9 @@ exports.getAllUsers = async (req, res) => {
   })));
 };
 
+/**
+ * @deprecated Use GraphQL Query: getUserById instead
+ */
 exports.getUserById = async (req, res) => {
   const userId = parseInt(req.params.id);
   logger.info('Fetching user by ID:', userId);
@@ -78,6 +103,9 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+/**
+ * @deprecated Use GraphQL Mutation: deleteUser instead
+ */
 exports.deleteUser = async (req, res) => {
   const userId = parseInt(req.params.id);
   logger.info('Deleting user by ID:', userId);
@@ -91,6 +119,9 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+/**
+ * @deprecated Use GraphQL Mutation: updateUser instead
+ */
 exports.updateUser = async (req, res) => {
   const userId = parseInt(req.params.id);
   const updates = req.body;
@@ -117,5 +148,3 @@ exports.updateUser = async (req, res) => {
     res.status(404).json({ error: 'User not found' });
   }
 };
-
-// ...removed legacy loginUser...
