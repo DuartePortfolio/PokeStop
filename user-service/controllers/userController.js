@@ -14,8 +14,7 @@
 // Legacy controller functions kept for reference
 // These are no longer used but show the mapping to GraphQL
 import logger from "../utils/logger.js";
-
-const userService = require("../services/userService");
+import * as userService from "../services/userService.js";
 
 /**
  * @deprecated Use GraphQL Mutation: registerUser instead

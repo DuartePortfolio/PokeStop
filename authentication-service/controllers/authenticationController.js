@@ -1,11 +1,11 @@
-import logger from "../utils/logger.js"
 
-const axios = require('axios');
-const authService = require("../services/authenticationService");
+import logger from "../utils/logger.js";
+import axios from "axios";
+import * as authService from "../services/authenticationService.js";
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3001';
 
-exports.register = async (req, res) => {
+export async function register(req, res) {
 	logger.info("Registering new user");
 	const { username, password, displayName, avatar, bio, badges, stats } = req.body;
 	if (!username || !password || !displayName) {
@@ -27,7 +27,7 @@ exports.register = async (req, res) => {
 	}
 };
 
-exports.login = async (req, res) => {
+export async function login(req, res) {
 	const { username, password } = req.body;
 	if (!username || !password) {
 		logger.warn("Missing username or password for login");

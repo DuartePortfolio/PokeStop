@@ -5,10 +5,13 @@ echo "PokeStop System Health Check"
 echo "=========================================="
 echo ""
 
-# Check Docker services
-echo "1. Docker Containers Status:"
+# Check Docker services (Compose or Swarm)
+echo "1. Docker Containers / Services Status:"
 echo "--------------------------------"
-docker ps --filter "label=com.docker.compose.project=pokestop" --format "table {{.Names}}\t{{.Status}}" | grep -E "^pokestop|^NAMES"
+# prefer Swarm stack namespace label, fall back to compose project label, then show services
+docker ps --filter "label=com.docker.stack.namespace=pokestop" --format "table {{.Names}}\t{{.Status}}" | grep -E "^pokestop|^NAMES" || \
+  docker ps --filter "label=com.docker.compose.project=pokestop" --format "table {{.Names}}\t{{.Status}}" | grep -E "^pokestop|^NAMES" || \
+  docker service ls --filter name=pokestop || echo "No containers/services found"
 echo ""
 
 # Check API Gateway

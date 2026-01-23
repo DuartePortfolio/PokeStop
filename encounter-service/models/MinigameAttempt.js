@@ -1,6 +1,6 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../services/sequelize');
-const Encounter = require('./Encounter');
+import { DataTypes } from 'sequelize';
+import sequelize from '../services/sequelize.js';
+import Encounter from './Encounter.js';
 
 const MinigameAttempt = sequelize.define('MinigameAttempt', {
   encounterId: { type: DataTypes.INTEGER, allowNull: false },
@@ -16,4 +16,4 @@ const MinigameAttempt = sequelize.define('MinigameAttempt', {
 MinigameAttempt.belongsTo(Encounter, { foreignKey: 'encounterId' });
 Encounter.hasMany(MinigameAttempt, { foreignKey: 'encounterId' });
 
-module.exports = MinigameAttempt;
+export default MinigameAttempt;

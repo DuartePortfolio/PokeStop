@@ -118,6 +118,11 @@
       background: linear-gradient(to bottom, var(--pokeball-red) 50%, var(--pokeball-white) 50%);
       border: 3px solid var(--pokeball-black);
       position: relative;
+    }
+
+    .nav-username{color:var(--pokeball-black);font-weight:700;text-decoration:none;display:inline-block;transition:transform 160ms ease,color 160ms ease;cursor:pointer}
+    .nav-username:hover,.nav-username:focus{color:var(--pokeball-red);transform:scale(1.04);outline:none}
+    .nav-username:focus{box-shadow:0 0 0 3px rgba(227,53,13,0.12);border-radius:6px}
       animation: bounce 2s ease-in-out infinite;
     }
 
@@ -301,6 +306,8 @@
     .btn-small:hover {
       background: linear-gradient(90deg,#ffe066,#ffd700);
     }
+    .btn-small.star{background:transparent;border:1px solid #fbbf24;color:#fbbf24;padding:6px 8px;box-shadow:none}
+    #items li.favorite{box-shadow:0 8px 26px rgba(239,68,68,0.06);border-color:#ef4444}
     .id {
       color: #94a3b8;
       font-size: 12px;
@@ -380,7 +387,7 @@
         <li><a href="encounter.html">Catch Pokémon</a></li>
         <li><a href="collections.html" class="active">Collection</a></li>
         <li><a href="pokedex.html">Pokédex</a></li>
-        <li><a href="#">Teams</a></li>
+        <li><a href="teams.html">Teams</a></li>
       </ul>
 
       <!-- Show when NOT logged in -->
@@ -391,7 +398,7 @@
 
       <!-- Show when logged in -->
       <div class="user-welcome hidden" id="userWelcome">
-        <span>👋 Welcome, <span id="username">Trainer</span>!</span>
+        <span>👋 Welcome, <a id="username" class="nav-username" href="user.html" title="View profile">Trainer</a>!</span>
         <button class="btn-logout" id="logoutBtn">Logout</button>
       </div>
     </div>
@@ -437,6 +444,7 @@
   <!-- Theme toggle (bottom-right) -->
   <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"><span class="emoji">🌙</span></button>
 
+<script src="modal.js"></script>
 <script>
 
 // Check if user is logged in
@@ -514,7 +522,7 @@ function getUserId() {
 
 const USER_ID = getUserId();
 if (!USER_ID) {
-  alert('Please log in first');
+  notify('Please log in first', { type: 'info' });
   window.location.href = '/login.html';
 }
 
@@ -545,6 +553,7 @@ async function fetchCollection(){
       const sprite = p.pokedexData?.sprites?.front_default || p.pokedexData?.sprites?.front || (p.pokemonID? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.pokemonID}.png` : '');
       const nickname = p.nickname ? `<span class="nickname">"${escapeHtml(p.nickname)}"</span>` : '';
       const captured = p.capturedAt ? `<div class="captured">Captured: ${new Date(p.capturedAt).toLocaleString()}</div>` : '';
+      const favClass = p.isFavorite ? ' favorite' : '';
 
       li.innerHTML = `
         ${sprite ? `<img class="poke-sprite" src="${sprite}" alt="${name}">` : ''}
@@ -555,11 +564,35 @@ async function fetchCollection(){
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
           <div class="id">#${p.pokemonID || p.pokemonId || ''}</div>
-          <button class="btn-small" onclick="openReleaseModal('${p._id}','${escapeHtml(name)}','${sprite.replace(/"/g,'')}', '${p.capturedAt || ''}')">Release</button>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn-small" onclick="toggleFavorite('${p._id}')">${p.isFavorite? '★' : '☆'}</button>
+            <button class="btn-small" onclick="openReleaseModal('${p._id}','${escapeHtml(name)}','${sprite.replace(/"/g,'')}', '${p.capturedAt || ''}')">Release</button>
+          </div>
         </div>
       `;
       list.appendChild(li);
     });
+
+  // toggle favorite function
+  window.toggleFavorite = async function(instanceId){
+    // find current favorite in cache
+    const current = (window._collectionCache||[]).find(p => p.isFavorite);
+    if(current && current._id === instanceId){
+      // un-favorite
+      try{ const res = await fetch(`${API_BASE}/pokemon/${instanceId}`, { method: 'PUT', headers: { 'Content-Type':'application/json','Authorization':`Bearer ${getAuthToken()}` }, body: JSON.stringify({ isFavorite: false }) }); if(!res.ok) throw new Error('Failed'); current.isFavorite = false; document.querySelectorAll('.btn-small').forEach(()=>{}); await fetchCollection(); notify('Favorite removed', { type: 'info' }); window.dispatchEvent(new Event('favoriteChanged')) }catch(e){ await showAlert('Failed to update favorite: ' + e.message); }
+      return;
+    }
+    try{
+      // unset previous favorite if any
+      if(current){ await fetch(`${API_BASE}/pokemon/${current._id}`, { method: 'PUT', headers: { 'Content-Type':'application/json','Authorization':`Bearer ${getAuthToken()}` }, body: JSON.stringify({ isFavorite: false }) }); }
+      // set new favorite
+      const res2 = await fetch(`${API_BASE}/pokemon/${instanceId}`, { method: 'PUT', headers: { 'Content-Type':'application/json','Authorization':`Bearer ${getAuthToken()}` }, body: JSON.stringify({ isFavorite: true }) });
+      if(!res2.ok) throw new Error('Failed');
+      // refresh collection
+      await fetchCollection();
+      notify('Favorite set', { type: 'success' }); window.dispatchEvent(new Event('favoriteChanged'));
+    }catch(e){ await showAlert('Failed to update favorite: ' + e.message); }
+  }
   }catch(err){
     loading.textContent = 'Error loading collection';
     console.error(err);
@@ -588,10 +621,10 @@ async function confirmRelease(){
       modal.classList.add('hidden');
       fetchCollection();
     } else {
-      alert('Failed to release Pokemon');
+      await showAlert('Failed to release Pokemon');
     }
   } catch (err) {
-    alert('Network error');
+    await showAlert('Network error');
   }
 }
 
@@ -632,12 +665,13 @@ searchInput.addEventListener('input', ()=>{
 });
 
 function renderListItem(p, list){
-  const li = document.createElement('li');
+  const li = document.createElement('li'); if(p.isFavorite) li.classList.add('favorite');
   const name = p.pokedexData?.name || `Pokemon #${p.pokemonID || p.pokemonId}`;
   const sprite = p.pokedexData?.sprites?.front_default || p.pokedexData?.sprites?.front || (p.pokemonID? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.pokemonID}.png` : '');
   const nickname = p.nickname ? `<span class="nickname">"${escapeHtml(p.nickname)}"</span>` : '';
   const captured = p.capturedAt ? `<div class="captured">Captured: ${new Date(p.capturedAt).toLocaleString()}</div>` : '';
 
+  const favBtn = `<button class="btn-small star" onclick="toggleFavorite('${p._id}')">${p.isFavorite? '★' : '☆'}</button>`;
   li.innerHTML = `
     ${sprite ? `<img class="poke-sprite" src="${sprite}" alt="${name}">` : ''}
     <div style="flex:1">
@@ -647,7 +681,7 @@ function renderListItem(p, list){
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
       <div class="id">#${p.pokemonID || p.pokemonId || ''}</div>
-      <button class="btn-small" onclick="openReleaseModal('${p._id}','${escapeHtml(name)}','${sprite.replace(/"/g,'')}', '${p.capturedAt || ''}')">Release</button>
+      <div style="display:flex;gap:6px;align-items:center">${favBtn}<button class="btn-small" onclick="openReleaseModal('${p._id}','${escapeHtml(name)}','${sprite.replace(/"/g,'')}', '${p.capturedAt || ''}')">Release</button></div>
     </div>
   `;
   list.appendChild(li);

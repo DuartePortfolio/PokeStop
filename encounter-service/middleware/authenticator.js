@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'pokestop-secret-change-in-production';
 
 function authenticateToken(req, res, next) {
@@ -18,4 +18,4 @@ function authenticateToken(req, res, next) {
   }
 }
 
-module.exports = { authenticateToken };
+export { authenticateToken };

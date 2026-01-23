@@ -1,4 +1,4 @@
-const authService = require('../services/authenticationService');
+import * as authService from '../services/authenticationService.js';
 
 function authenticateToken(req, res, next) {
 	const authHeader = req.headers.authorization;
@@ -33,4 +33,4 @@ function authorizeSelf(req, res, next) {
 	next();
 }
 
-module.exports = { authenticateToken, authorizeRole, authorizeSelf };
+export { authenticateToken, authorizeRole, authorizeSelf };

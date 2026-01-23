@@ -1,4 +1,4 @@
-const authService = require('../services/authService');
+import * as authService from '../services/authService.js';
 
 // Middleware to extract and verify token from Authorization header
 function authenticateTokenMiddleware(req, res, next) {
@@ -20,4 +20,4 @@ function authenticateTokenMiddleware(req, res, next) {
   next();
 }
 
-module.exports = { authenticateTokenMiddleware };
+export { authenticateTokenMiddleware };

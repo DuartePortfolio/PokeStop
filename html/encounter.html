@@ -655,11 +655,11 @@
         <li><a href="encounter.html" class="active">Catch Pokémon</a></li>
         <li><a href="collections.html">Collection</a></li>
         <li><a href="pokedex.html">Pokédex</a></li>
-        <li><a href="#">Teams</a></li>
+        <li><a href="teams.html">Teams</a></li>
       </ul>
 
       <div class="user-info">
-        <span>👋 <span id="username">Trainer</span></span>
+        <span>👋 <a id="username" class="nav-username" href="user.html" title="View profile">Trainer</a></span>
         <button class="btn-nav" id="logoutBtn">Logout</button>
       </div>
     </div>
@@ -778,6 +778,7 @@
     </div>
   </main>
 
+<script src="modal.js"></script>
 <script>
 const API_BASE = '/api/encounters';
 
@@ -801,7 +802,7 @@ function getUserFromToken() {
 // Check auth on load
 const user = getUserFromToken();
 if (!user) {
-  alert('Please log in first');
+  notify('Please log in first', { type: 'info' });
   window.location.href = '/login.html';
 } else {
   document.getElementById('username').textContent = user.username || 'Trainer';
@@ -1156,7 +1157,7 @@ async function endMinigame(filled) {
     result.finalScore = score;
     showResultScreen(result);
   } catch (e) {
-    alert('Error: ' + e.message);
+    await showAlert('Error: ' + e.message);
     showScreen(startScreen);
   }
 }
@@ -1220,7 +1221,7 @@ async function addToCollection() {
     currentEncounter = null;
     document.getElementById('nicknameInput').value = '';
   } catch (e) {
-    alert('Error adding to collection: ' + e.message);
+    await showAlert('Error adding to collection: ' + e.message);
   }
 }
 
@@ -1229,12 +1230,13 @@ async function spawnEncounter() {
     currentEncounter = await apiCall('/spawn', 'POST');
     showEncounterScreen();
   } catch (e) {
-    alert('Error: ' + e.message);
+    await showAlert('Error: ' + e.message);
   }
 }
 
 async function skipEncounter() {
-  if (!confirm('Are you sure you want to run away?')) return;
+  const ok = await showConfirm('Are you sure you want to run away?');
+  if (!ok) return;
   
   try {
     await apiCall('/skip', 'POST', { encounterId: currentEncounter.encounterId });
@@ -1242,7 +1244,7 @@ async function skipEncounter() {
     showScreen(startScreen);
     loadStats();
   } catch (e) {
-    alert('Error: ' + e.message);
+    await showAlert('Error: ' + e.message);
   }
 }
 
