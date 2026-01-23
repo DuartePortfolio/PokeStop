@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
+import * as encounterController from '../controllers/encounterController.js';
+import { authenticateToken } from '../middleware/authenticator.js';
 const router = express.Router();
-const encounterController = require('../controllers/encounterController');
-const { authenticateToken } = require('../middleware/authenticator');
 
 // All routes require authentication
 router.use(authenticateToken);
@@ -27,4 +27,4 @@ router.get('/history', encounterController.getHistory);
 // Get encounter stats
 router.get('/stats', encounterController.getStats);
 
-module.exports = router;
+export default router;

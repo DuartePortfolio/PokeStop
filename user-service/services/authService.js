@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'pokestop-secret-change-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
@@ -21,7 +21,4 @@ function verifyToken(token) {
   }
 }
 
-module.exports = {
-  generateToken,
-  verifyToken
-};
+export { generateToken, verifyToken };

@@ -1,7 +1,7 @@
-const express = require("express");
-const app = express();
-const authRoutes = require("./routes/authenticationRoutes");
+import express from "express";
+import authRoutes from "./routes/authenticationRoutes.js";
 
+const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use("/", authRoutes);
 

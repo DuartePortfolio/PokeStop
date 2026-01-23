@@ -1,4 +1,4 @@
-const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLBoolean, GraphQLList, GraphQLNonNull } = require('graphql');
+import { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLBoolean, GraphQLList, GraphQLNonNull } from 'graphql';
 
 const UserType = new GraphQLObjectType({
   name: 'User',
@@ -91,4 +91,4 @@ const schema = new GraphQLSchema({
   mutation: MutationType
 });
 
-module.exports = schema;
+export default schema;

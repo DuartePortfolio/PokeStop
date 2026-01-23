@@ -26,7 +26,7 @@ def serialize(doc):
 
 
 def require_auth(f):
-    """Decorator to require JWT authentication"""
+    
     @wraps(f)
     def decorated(*args, **kwargs):
         auth_header = request.headers.get("Authorization")
@@ -47,7 +47,7 @@ def require_auth(f):
 
 
 def require_owner(f):
-    """Decorator to ensure user can only access their own resources"""
+    """ensure user can only access their own resources"""
     @wraps(f)
     def decorated(*args, **kwargs):
         user_id = kwargs.get("user_id")
@@ -62,13 +62,13 @@ def health():
     return jsonify({"status": "ok", "service": "collection-service"}), 200
 
 
-# ============ Pokemon Instance Routes (User's PC/Box) ============
+# ============ Pokemon Instance Routes ============
 
 @app.route("/pokemon/user/<int:user_id>", methods=["GET"])
 @require_auth
 @require_owner
 def get_user_pokemon(user_id):
-    """Get all Pokemon owned by a user, enriched with Pokedex data"""
+    """Get all Pokemon owned by a user"""
     enrich = request.args.get("enrich", "true").lower() == "true"
     pokemon_list = svc.get_user_pokemon(user_id, enrich=enrich)
     return jsonify({
@@ -110,7 +110,7 @@ def add_pokemon(user_id):
         if k not in data:
             return jsonify({"error": f"Missing field: {k}"}), 400
     
-    # Set defaults for optional fields
+   
     data.setdefault("nickname", None)
     data.setdefault("experience", 0)
     data.setdefault("isShiny", False)
@@ -128,7 +128,7 @@ def add_pokemon(user_id):
 @app.route("/pokemon/<instance_id>", methods=["PUT"])
 @require_auth
 def update_pokemon(instance_id):
-    """Update a Pokemon instance (nickname, held item, etc.)"""
+    """Update a Pokemon instance """
     # First check ownership
     try:
         pokemon = svc.get_pokemon_instance(instance_id, enrich=False)
@@ -155,7 +155,6 @@ def update_pokemon(instance_id):
 @require_auth
 def release_pokemon(instance_id):
     """Release a Pokemon (delete from collection)"""
-    # First check ownership
     try:
         pokemon = svc.get_pokemon_instance(instance_id, enrich=False)
     except Exception:

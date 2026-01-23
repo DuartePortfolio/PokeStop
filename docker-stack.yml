@@ -1,33 +1,23 @@
 version: '3.8'
 
 services:
-  # API Gateway (NGINX)
   api-gateway:
     image: nginx:alpine
-    # container_name: pokestop-api-gateway
     ports:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./html:/usr/share/nginx/html/pages:ro
       - ./styles:/usr/share/nginx/html/styles:ro
-    depends_on:
-      - authentication-service
-      - user-service
-      - team-service
-      - pokedex-service
-      - collection-service
-      - encounter-service
     networks:
       - pokestop-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # Authentication Service
   authentication-service:
     image: pokestop/authentication-service:latest
-    build:
-      context: ./authentication-service
-      dockerfile: Dockerfile
-    # container_name: pokestop-authentication-service
     environment:
       - PORT=3000
       - NODE_ENV=production
@@ -36,19 +26,15 @@ services:
       - DB_USER=root
       - DB_PASSWORD=enter
       - DB_NAME=pokestop_auth_db
-    depends_on:
-      - db
     networks:
       - pokestop-network
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # User Service
   user-service:
     image: pokestop/user-service:latest
-    build:
-      context: ./user-service
-      dockerfile: Dockerfile
-    # container_name: pokestop-user-service
     ports:
       - "3001:3001"
     environment:
@@ -59,19 +45,15 @@ services:
       - DB_USER=root
       - DB_PASSWORD=enter
       - DB_NAME=pokestop_users_db
-    depends_on:
-      - db
     networks:
       - pokestop-network
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # Team Service
   team-service:
     image: pokestop/team-service:latest
-    build:
-      context: ./team-service
-      dockerfile: Dockerfile
-    # container_name: pokestop-team-service
     environment:
       - PORT=3002
       - NODE_ENV=production
@@ -79,19 +61,15 @@ services:
       - DB_USER=root
       - DB_PASSWORD=enter
       - DB_NAME=pokestop_teams_db
-    depends_on:
-      - db
     networks:
       - pokestop-network
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # Pokedex Service
   pokedex-service:
     image: pokestop/pokedex-service:latest
-    build:
-      context: ./pokedex-service
-      dockerfile: Dockerfile
-    # container_name: pokestop-pokedex-service
     environment:
       - PORT=3003
       - NODE_ENV=production
@@ -99,39 +77,30 @@ services:
       - DB_USER=root
       - DB_PASSWORD=enter
       - DB_NAME=pokestop_pokedex_db
-    depends_on:
-      - db
     networks:
       - pokestop-network
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # Collection Service (MongoDB)
   collection-service:
     image: pokestop/collection-service:latest
-    build:
-      context: ./collection-service
-      dockerfile: Dockerfile
-    # container_name: pokestop-collection-service
     environment:
       - PORT=3004
       - MONGO_URI=mongodb://root:enter@mongodb:27017/pokestop_collection_db?authSource=admin
       - DB_NAME=pokestop_collection_db
       - POKEDEX_SERVICE_URL=http://pokedex-service:3003
       - JWT_SECRET=${JWT_SECRET:-pokestop-secret-change-in-production}
-    depends_on:
-      - mongodb
-      - pokedex-service
     networks:
       - pokestop-network
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # Encounter Service
   encounter-service:
     image: pokestop/encounter-service:latest
-    build:
-      context: ./encounter-service
-      dockerfile: Dockerfile
-    # container_name: pokestop-encounter-service
     environment:
       - PORT=3005
       - NODE_ENV=production
@@ -142,18 +111,15 @@ services:
       - DB_NAME=pokestop_encounter_db
       - POKEDEX_SERVICE_URL=http://pokedex-service:3003
       - COLLECTION_SERVICE_URL=http://collection-service:3004
-    depends_on:
-      - db
-      - pokedex-service
-      - collection-service
     networks:
       - pokestop-network
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # MySQL Database
   db:
     image: mysql:8.0
-    # container_name: pokestop-db
     ports:
       - "3307:3306"
     environment:
@@ -164,18 +130,14 @@ services:
       - ./database-schemas/init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql:ro
     networks:
       - pokestop-network
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
     command: --default-authentication-plugin=mysql_native_password
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  # MongoDB (for Collection Service)
   mongodb:
     image: mongo:7.0
-    # container_name: pokestop-mongodb
     ports:
       - "27017:27017"
     environment:
@@ -187,16 +149,14 @@ services:
       - ./database-schemas/init-mongodb.js:/docker-entrypoint-initdb.d/init-mongodb.js:ro
     networks:
       - pokestop-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
 networks:
   pokestop-network:
-    driver: bridge
+    driver: overlay
 
 volumes:
   mysql-data:

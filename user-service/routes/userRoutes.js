@@ -16,10 +16,10 @@
  * - DELETE /users/:id         → Mutation: deleteUser
  */
 
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
 // All endpoints are now handled by GraphQL at /graphql
 // This file is kept for documentation purposes only.
 
-module.exports = router;
+export default router;

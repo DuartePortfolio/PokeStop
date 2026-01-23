@@ -15,6 +15,9 @@
     .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:70px}
     .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pokeball-black)}
     .logo-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(to bottom,var(--pokeball-red) 50%,var(--pokeball-white) 50%);border:3px solid var(--pokeball-black);position:relative;animation:bounce 2s ease-in-out infinite}
+    .nav-username{color:var(--pokeball-black);font-weight:700;text-decoration:none;display:inline-block;transition:transform 160ms ease,color 160ms ease;cursor:pointer}
+    .nav-username:hover,.nav-username:focus{color:var(--pokeball-red);transform:scale(1.04);outline:none}
+    .nav-username:focus{box-shadow:0 0 0 3px rgba(227,53,13,0.12);border-radius:6px}
     .logo-icon::before{content:'';position:absolute;top:50%;left:0;right:0;height:4px;background:var(--pokeball-black);transform:translateY(-50%)}
     .logo-icon::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:var(--pokeball-white);border:3px solid var(--pokeball-black);border-radius:50%}
     @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
@@ -76,7 +79,7 @@
         <li><a href="encounter.html">Catch Pokémon</a></li>
         <li><a href="collections.html">Collection</a></li>
         <li><a href="pokedex.html">Pokédex</a></li>
-        <li><a href="#">Teams</a></li>
+        <li><a href="teams.html">Teams</a></li>
       </ul>
 
       <!-- Show when NOT logged in -->
@@ -87,7 +90,7 @@
 
       <!-- Show when logged in -->
       <div class="user-welcome hidden" id="userWelcome">
-        <span>👋 Welcome, <span id="username">Trainer</span>!</span>
+        <span>👋 Welcome, <a id="username" class="nav-username" href="user.html" title="View profile">Trainer</a>!</span>
         <button class="btn-logout" id="logoutBtn">Logout</button>
       </div>
     </div>
@@ -127,13 +130,14 @@
   <!-- Theme toggle (global) -->
   <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode"><span class="emoji">🌙</span></button>
 
+<script src="modal.js"></script>
 <script>
 // Auth helpers
 function getAuthToken(){return localStorage.getItem('authToken');}
 function getUserFromToken(){const token = getAuthToken(); if(token){try{return JSON.parse(atob(token.split('.')[1]));}catch(e){return null}} return null}
 
 function updateNavForAuth(){ const user=getUserFromToken(); const authButtons=document.getElementById('authButtons'); const userWelcome=document.getElementById('userWelcome'); const usernameEl=document.getElementById('username'); if(user){authButtons.classList.add('hidden'); userWelcome.classList.remove('hidden'); usernameEl.textContent=user.username||'Trainer'} else {authButtons.classList.remove('hidden'); userWelcome.classList.add('hidden')}}
-function logout(){localStorage.removeItem('authToken'); updateNavForAuth(); window.location.href='login.html'}
+function logout(){localStorage.removeItem('authToken'); updateNavForAuth(); window.location.href='login.html';}
 document.getElementById('logoutBtn').addEventListener('click', logout);
 updateNavForAuth();
 
@@ -162,7 +166,7 @@ async function fetchList(){
     offset += limit;
     // hide load more if we've loaded all
     if(offset >= data.count){loadMoreBtn.style.display='none'} else {loadMoreBtn.style.display='inline-block'}
-  }catch(err){console.error(err); alert('Failed to fetch Pokemon list')}
+  }catch(err){console.error(err); await showAlert('Failed to fetch Pokemon list')}
   loading=false; loadMoreBtn.disabled=false; loadMoreBtn.textContent='Load more';
 }
 
@@ -298,7 +302,7 @@ async function handleSearch(){
       if(q) pokemon = pokemon.filter(p => p.name.startsWith(q.toLowerCase()));
       if(!pokemon.length) { listGrid.innerHTML='<div class="muted">No results</div>'; return }
       renderList(pokemon);
-    }catch(err){console.error(err); alert('Failed to fetch by type')}
+    }catch(err){console.error(err); await showAlert('Failed to fetch by type')}
     return;
   }
 
@@ -392,7 +396,6 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;',
 // Load initial
 loadTypes(); fetchList();
 loadMoreBtn.addEventListener('click', fetchList);
-
 // Theme toggle logic (global)
 (function setupThemeToggle(){
   const toggle = document.getElementById('themeToggle');
