@@ -1,3 +1,5 @@
+import logger from "../utils/logger.js"
+
 const pokedexService = require('../services/pokedexService');
 
 /**
@@ -6,13 +8,14 @@ const pokedexService = require('../services/pokedexService');
  */
 exports.listPokemon = async (req, res) => {
     try {
+        logger.info('Fetching Pokemon list', { limit: req.query.limit, offset: req.query.offset });
         const limit = Math.min(parseInt(req.query.limit) || 20, 100); // Max 100
         const offset = parseInt(req.query.offset) || 0;
-        
+
         const result = await pokedexService.getPokemonList(limit, offset);
         res.json(result);
     } catch (err) {
-        console.error('Error fetching Pokemon list:', err.message);
+        logger.error('Error fetching Pokemon list:', err.message);
         res.status(500).json({ error: 'Failed to fetch Pokemon list' });
     }
 };
@@ -24,13 +27,15 @@ exports.listPokemon = async (req, res) => {
 exports.getPokemonById = async (req, res) => {
     try {
         const { id } = req.params;
+        logger.info('Fetching Pokemon by ID', { id });
         const pokemon = await pokedexService.getPokemonById(id);
         res.json(pokemon);
     } catch (err) {
         if (err.response?.status === 404) {
+            logger.warn('Pokemon not found', { id: req.params.id });
             return res.status(404).json({ error: 'Pokemon not found' });
         }
-        console.error('Error fetching Pokemon:', err.message);
+        logger.error('Error fetching Pokemon:', err.message);
         res.status(500).json({ error: 'Failed to fetch Pokemon' });
     }
 };
@@ -42,13 +47,15 @@ exports.getPokemonById = async (req, res) => {
 exports.getPokemonByName = async (req, res) => {
     try {
         const { name } = req.params;
+        logger.info('Fetching Pokemon by name', { name });
         const pokemon = await pokedexService.getPokemonByName(name);
         res.json(pokemon);
     } catch (err) {
         if (err.response?.status === 404) {
+            logger.warn('Pokemon not found', { name: req.params.name });
             return res.status(404).json({ error: 'Pokemon not found' });
         }
-        console.error('Error fetching Pokemon by name:', err.message);
+        logger.error('Error fetching Pokemon by name:', err.message);
         res.status(500).json({ error: 'Failed to fetch Pokemon' });
     }
 };
@@ -60,13 +67,15 @@ exports.getPokemonByName = async (req, res) => {
 exports.getPokemonSpecies = async (req, res) => {
     try {
         const { id } = req.params;
+        logger.info('Fetching Pokemon species', { id });
         const species = await pokedexService.getPokemonSpecies(id);
         res.json(species);
     } catch (err) {
         if (err.response?.status === 404) {
+            logger.warn('Pokemon species not found', { id: req.params.id });
             return res.status(404).json({ error: 'Pokemon species not found' });
         }
-        console.error('Error fetching Pokemon species:', err.message);
+        logger.error('Error fetching Pokemon species:', err.message);
         res.status(500).json({ error: 'Failed to fetch Pokemon species' });
     }
 };
@@ -77,10 +86,11 @@ exports.getPokemonSpecies = async (req, res) => {
  */
 exports.listTypes = async (req, res) => {
     try {
+        logger.info('Fetching all types');
         const types = await pokedexService.getTypes();
         res.json({ types });
     } catch (err) {
-        console.error('Error fetching types:', err.message);
+        logger.error('Error fetching types:', err.message);
         res.status(500).json({ error: 'Failed to fetch types' });
     }
 };
@@ -92,17 +102,19 @@ exports.listTypes = async (req, res) => {
 exports.getPokemonByType = async (req, res) => {
     try {
         const { type } = req.params;
+        logger.info('Fetching Pokemon by type', { type });
         const pokemon = await pokedexService.getPokemonByType(type);
-        res.json({ 
-            type, 
+        res.json({
+            type,
             count: pokemon.length,
-            pokemon 
+            pokemon
         });
     } catch (err) {
         if (err.response?.status === 404) {
+            logger.warn('Type not found', { type: req.params.type });
             return res.status(404).json({ error: 'Type not found' });
         }
-        console.error('Error fetching Pokemon by type:', err.message);
+        logger.error('Error fetching Pokemon by type:', err.message);
         res.status(500).json({ error: 'Failed to fetch Pokemon by type' });
     }
 };
@@ -113,12 +125,12 @@ exports.getPokemonByType = async (req, res) => {
  */
 exports.getRandomPokemon = async (req, res) => {
     try {
-        // Default to Gen 1 (151), but allow specifying max ID
         const maxId = Math.min(parseInt(req.query.maxId) || 151, 1010);
+        logger.info('Fetching random Pokemon', { maxId });
         const pokemon = await pokedexService.getRandomPokemon(maxId);
         res.json(pokemon);
     } catch (err) {
-        console.error('Error fetching random Pokemon:', err.message);
+        logger.error('Error fetching random Pokemon:', err.message);
         res.status(500).json({ error: 'Failed to fetch random Pokemon' });
     }
 };
@@ -130,12 +142,13 @@ exports.getRandomPokemon = async (req, res) => {
 exports.searchPokemon = async (req, res) => {
     try {
         const q = String(req.query.q || '').trim();
+        logger.info('Searching Pokemon', { q, limit: req.query.limit });
         if (!q) return res.json({ results: [] });
         const limit = Math.min(parseInt(req.query.limit) || 200, 500);
         const results = await pokedexService.searchPokemonByPrefix(q, limit);
         res.json({ count: results.length, results });
     } catch (err) {
-        console.error('Error searching Pokemon:', err.message);
+        logger.error('Error searching Pokemon:', err.message);
         res.status(500).json({ error: 'Failed to search Pokemon' });
     }
 };
