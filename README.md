@@ -1,3 +1,4 @@
+
 # PokeStop - Pokémon Encounter and Collection Platform
 
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
@@ -7,7 +8,212 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green.svg)](https://mongodb.com)
 [![GraphQL](https://img.shields.io/badge/GraphQL-API-pink.svg)](https://graphql.org)
 
-PokeStop is a comprehensive Pokémon encounter and collection platform built with a microservices architecture. Inspired by Pokémon, it allows users to register, login, encounter wild Pokémon, attempt to catch them through mini-games, build collections, and manage teams.
+PokeStop is a microservices-based Pokémon encounter and collection platform. Users can register, login, encounter wild Pokémon, catch them via mini-games, build collections, and manage teams. The platform uses Node.js, Python, MySQL, MongoDB, Docker, and NGINX.
+
+---
+
+## 🚀 Quick Start
+
+```powershell
+# Clone the repository
+cd <your-folder>
+git clone <repository-url>
+cd PokeStop
+
+# Build and start all services
+# (Windows PowerShell)
+docker-compose up --build -d
+./health_check.ps1
+
+# (Linux/macOS)
+./health_check.sh
+```
+
+- **Homepage:** http://localhost/
+- **Register:** http://localhost/register.html
+- **Login:** http://localhost/login.html
+- **GraphQL:** http://localhost:3001/graphql
+- **Health Check:** http://localhost/health
+
+To stop all services:
+```powershell
+docker-compose down
+```
+
+---
+
+## 🏗️ Architecture & Services
+
+```
+┌───────────────┐    ┌──────────────────────┐
+│ Web Browser   │────│   NGINX API Gateway  │
+└───────────────┘    └──────────────────────┘
+           │
+       ┌─────────┼─────────┐
+     ┌───────▼───┐ ┌───▼───┐ ┌───▼───┐
+     │Auth       │ │User   │ │Team   │
+     │Service    │ │Service│ │Service│
+     └───────▲───┘ └───────┘ └───────┘
+       │
+     ┌───────▼───┐ ┌───▼───┐ ┌───▼───┐
+     │Pokedex    │ │Collection│ │Encounter│
+     │Service    │ │Service  │ │Service  │
+     └───────────┘ └────────┘ └────────┘
+       │         │         │
+     ┌───────▼─────────▼─────────▼───────┐
+     │           Databases               │
+     │   MySQL (3306) │ MongoDB (27017)  │
+     └───────────────────────────────────┘
+```
+
+| Service           | Tech                | DB      | Port  | Purpose                                 |
+|-------------------|---------------------|---------|-------|-----------------------------------------|
+| API Gateway       | NGINX               | -       | 80    | Routing, static file serving            |
+| Authentication    | Node.js/Express     | MySQL   | 3000  | Login/registration, JWT tokens          |
+| User              | Node.js/Express/GraphQL | MySQL | 3001  | User profiles, GraphQL API              |
+| Team              | Node.js/Express     | MySQL   | 3002  | Team management                         |
+| Pokedex           | Node.js/Express     | MySQL   | 3003  | Pokémon data/info                       |
+| Collection        | Python/Flask        | MongoDB | 3004  | Caught Pokémon storage                  |
+| Encounter         | Node.js/Express     | MySQL   | 3005  | Wild Pokémon encounters                 |
+
+---
+
+## 📋 Prerequisites
+- **Docker** (20.10+)
+- **Docker Compose** (2.0+)
+- **Git**
+- **Web Browser**
+
+## 🛠️ Technologies
+- Node.js, Express.js, Python/Flask
+- MySQL, MongoDB
+- Docker, Docker Compose, NGINX
+- JWT, bcrypt
+- HTML5/CSS3/JavaScript (frontend)
+
+---
+
+## 📖 Usage
+
+### Web Interface
+- Register: http://localhost/register.html
+- Login: http://localhost/login.html
+- Explore: collections, teams, encounters, pokedex
+
+### API Endpoints (via NGINX at http://localhost)
+
+#### Authentication
+```http
+POST /api/auth/login
+POST /api/auth/register
+```
+#### User (GraphQL)
+```http
+POST /api/users/graphql
+```
+#### Teams
+```http
+GET /api/teams/user/{userId}
+POST /api/teams/user/{userId}
+```
+#### Encounters
+```http
+POST /api/encounters
+POST /api/encounters/catch
+```
+#### Collection
+```http
+GET /api/collection/user/{userId}
+POST /api/collection
+```
+#### Pokedex
+```http
+GET /api/pokedex
+GET /api/pokedex/{id}
+```
+
+---
+
+## 🔧 Development
+
+```powershell
+# Start only databases
+# (useful for local dev)
+docker-compose up -d db mongodb
+
+# Install dependencies for each service
+cd authentication-service && npm install
+cd ../user-service && npm install
+cd ../collection-service && pip install -r requirements.txt
+# ...repeat for other services
+
+# Start a service manually
+cd authentication-service && npm start
+```
+
+- Rebuild a service: `docker-compose up --build <service-name>`
+- View logs: `docker-compose logs -f <service-name>`
+- Access service directly: `curl http://localhost:3000/health`
+
+### Database Management
+- Access MySQL: `docker exec -it pokestop-db mysql -u root -p <db>`
+- Access MongoDB: `docker exec -it pokestop-mongodb mongosh -u root -p <db>`
+- Reset DBs: `docker-compose down -v && docker-compose up -d db mongodb`
+
+### Testing
+- Health checks: `./health_check.ps1`
+- API tests: Import `PokeStop.postman_collection.json` into Postman
+- Manual: `curl -X GET http://localhost/health`
+
+---
+
+## 📁 Project Structure
+
+```
+PokeStop/
+├── docker-compose.yml
+├── docker-stack.yml
+├── nginx.conf
+├── health_check.ps1 / .sh
+├── setup.ps1 / .sh
+├── authentication-service/
+├── user-service/
+├── team-service/
+├── pokedex-service/
+├── collection-service/
+├── encounter-service/
+├── database-schemas/
+├── html/
+├── styles/
+└── docs/
+```
+
+---
+
+## 🔒 Security
+- JWT authentication, bcrypt password hashing
+- Input validation, CORS, environment variables
+- Network isolation via Docker
+
+## 🤝 Contributing
+- Fork, branch, commit, push, and open a PR
+- Follow code style, add tests, update docs
+
+## 📄 License
+MIT License - see [LICENSE](LICENSE)
+
+## 🙏 Acknowledgments
+- Inspired by Pokémon, built for education
+
+## 📞 Support
+- See [ADVANCED_GUIDE.md](ADVANCED_GUIDE.md) for troubleshooting
+- Logs: `docker-compose logs -f`
+- Test endpoints with Postman
+- Open an issue on GitHub
+
+---
+**Status:** ✅ Fully operational and tested end-to-end
+**Last Updated:** January 23, 2026
 
 ## 🌟 Features
 
